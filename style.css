@@ -187,10 +187,12 @@ body {
    Main Viewport
    ========================================================================== */
 .main-viewport {
-  flex: 1;
+  flex: 1 1 0%;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100%;
+  min-height: 0;
+  max-height: 100dvh;
   background: var(--surface-app);
   position: relative;
   overflow: hidden;
@@ -1039,10 +1041,33 @@ body {
 /* View panels */
 .view-panel {
   width: 100%;
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+#view-room {
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.room-shell {
+  width: 100%;
+  height: 100%;
+  flex: 1 1 0%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
 }
 
 .nav-count-badge {
@@ -1634,6 +1659,7 @@ select.figma-input-field {
   z-index: 10;
   gap: 12px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .action-bar-left {
@@ -1775,6 +1801,10 @@ select.figma-input-field {
   color: var(--figma-magenta);
   font-weight: 600;
   border-bottom: 1px solid rgba(207, 43, 116, 0.15);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* --------------------------------------------------------------------------
@@ -1782,13 +1812,36 @@ select.figma-input-field {
    -------------------------------------------------------------------------- */
 .chat-messages-scroll,
 .messages {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
   overflow-y: auto;
-  padding: 20px clamp(14px, 5%, 80px);
+  overflow-x: hidden;
+  padding: 18px clamp(12px, 4%, 48px);
   display: flex;
   flex-direction: column;
   gap: 12px;
   background: #f7f9fc;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+}
+
+.chat-messages-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-messages-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 55, 103, 0.18);
+  border-radius: 4px;
+}
+
+.chat-messages-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 55, 103, 0.35);
 }
 
 /* ChatWave Date & System Notice Pills */
@@ -2012,9 +2065,10 @@ select.figma-input-field {
   gap: 8px;
   overflow-x: auto;
   padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.7);
   border-top: 1px solid rgba(0, 55, 103, 0.05);
   scrollbar-width: none;
+  flex-shrink: 0;
 }
 
 .prompt-chips-row::-webkit-scrollbar {
@@ -2032,6 +2086,7 @@ select.figma-input-field {
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .chip-btn:hover {
@@ -2047,6 +2102,7 @@ select.figma-input-field {
   background: #ffffff;
   border-top: 1px solid rgba(0, 55, 103, 0.08);
   z-index: 10;
+  flex-shrink: 0;
 }
 
 .composer-accessibility-actions {
@@ -2763,9 +2819,44 @@ button, input, select, textarea, .sidebar-item, .dock-tab, .figma-action-btn, .c
 
 /* Smooth message scrolling with momentum */
 .chat-messages-scroll {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+}
+
+/* In Room View: Hide bottom navigation dock and duplicate mobile topbar */
+body.in-room-view .mobile-bottom-dock,
+#app-screen.in-room-view .mobile-bottom-dock {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  body.in-room-view .app-topbar,
+  #app-screen.in-room-view .app-topbar {
+    display: none !important;
+  }
+
+  .figma-room-action-bar {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+
+  .figma-action-btn {
+    padding: 6px 10px;
+    font-size: 11.5px;
+  }
+}
+
+@media (max-width: 520px) {
+  .figma-action-btn span {
+    display: none;
+  }
+  .figma-action-btn {
+    padding: 8px 10px;
+  }
 }
 

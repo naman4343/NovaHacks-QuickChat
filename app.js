@@ -449,6 +449,19 @@
     const allNavButtons = document.querySelectorAll('.dock-tab, .sidebar-item');
     allNavButtons.forEach(b => b.classList.remove('active'));
 
+    const appScreen = document.getElementById('app-screen');
+    const mobileBottomDock = document.querySelector('.mobile-bottom-dock');
+
+    if (viewName === 'room') {
+      document.body.classList.add('in-room-view');
+      if (appScreen) appScreen.classList.add('in-room-view');
+      if (mobileBottomDock) mobileBottomDock.style.display = 'none';
+    } else {
+      document.body.classList.remove('in-room-view');
+      if (appScreen) appScreen.classList.remove('in-room-view');
+      if (mobileBottomDock) mobileBottomDock.style.display = '';
+    }
+
     if (viewName === 'login' || viewName === 'onboarding') {
       if (viewLogin) viewLogin.style.display = 'flex';
       if (pageTitle) pageTitle.textContent = 'Login to QuickChat';
@@ -551,6 +564,20 @@
     updateRoomTTLCountdown(room.expiresAt);
     renderMessageStream(room.messages);
     switchView('room');
+
+    // Ensure scrolling down to latest message once room becomes visible
+    requestAnimationFrame(() => {
+      const container = document.getElementById('chat-messages-container');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    });
+    setTimeout(() => {
+      const container = document.getElementById('chat-messages-container');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 60);
 
     startLiveSync(roomId);
 
@@ -859,6 +886,9 @@
     });
 
     container.scrollTop = container.scrollHeight;
+    requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+    });
   }
 
   function sendChatMessage(text) {
