@@ -121,8 +121,7 @@
         participants: [
           { id: 'p1', name: 'Maya Patel', initial: 'M', color: 'circle-color-navy', isHost: true },
           { id: 'p2', name: 'Jordan Lee', initial: 'J', color: 'circle-color-cyan', isHost: false },
-          { id: 'p3', name: 'Chris Chen', initial: 'C', color: 'circle-color-magenta', isHost: false },
-          { id: 'p4', name: 'Alex Rivera', initial: 'A', color: 'circle-color-lime', isHost: false }
+          { id: 'p3', name: 'Chris Chen', initial: 'C', color: 'circle-color-magenta', isHost: false }
         ],
         messages: [
           {
@@ -142,22 +141,133 @@
             timestamp: now - 900000
           }
         ]
+      },
+      {
+        roomId: 'COMP-3254-02',
+        courseTopic: 'COMP 3254',
+        hostName: 'Samira Khan',
+        createdAt: now - 5400000,
+        expiresAt: now + 20 * 3600000,
+        status: 'active',
+        unreadCount: 1,
+        participants: [
+          { id: 'p4', name: 'Samira Khan', initial: 'S', color: 'circle-color-lime', isHost: true },
+          { id: 'p5', name: 'Alex Rivera', initial: 'A', color: 'circle-color-cyan', isHost: false },
+          { id: 'p6', name: 'Devon Patel', initial: 'D', color: 'circle-color-navy', isHost: false }
+        ],
+        messages: [
+          {
+            id: 'm-comp-1',
+            sender: 'Samira Khan',
+            senderInitial: 'S',
+            isHost: true,
+            text: 'Has anyone started the API sync assignment for COMP 3254?',
+            timestamp: now - 3600000
+          }
+        ]
+      },
+      {
+        roomId: 'SYS-DESIGN-03',
+        courseTopic: 'System Design',
+        hostName: 'Liam Wright',
+        createdAt: now - 7200000,
+        expiresAt: now + 18 * 3600000,
+        status: 'active',
+        unreadCount: 0,
+        participants: [
+          { id: 'p7', name: 'Liam Wright', initial: 'L', color: 'circle-color-magenta', isHost: true },
+          { id: 'p8', name: 'Elena Rostova', initial: 'E', color: 'circle-color-lime', isHost: false },
+          { id: 'p9', name: 'Marcus Brody', initial: 'M', color: 'circle-color-navy', isHost: false }
+        ],
+        messages: [
+          {
+            id: 'm-sys-1',
+            sender: 'Liam Wright',
+            senderInitial: 'L',
+            isHost: true,
+            text: 'System Design group: wireframes and accessibility state machine are ready.',
+            timestamp: now - 5000000
+          }
+        ]
+      },
+      {
+        roomId: 'NARR-2-3-04',
+        courseTopic: 'Narrative 2_3',
+        hostName: 'Chloe Bennett',
+        createdAt: now - 86400000 * 5,
+        expiresAt: now - 86400000 * 4,
+        status: 'recent',
+        unreadCount: 0,
+        participants: [
+          { id: 'p10', name: 'Chloe Bennett', initial: 'C', color: 'circle-color-cyan', isHost: true },
+          { id: 'p11', name: 'Zoe Martin', initial: 'Z', color: 'circle-color-navy', isHost: false },
+          { id: 'p12', name: 'Noah Davis', initial: 'N', color: 'circle-color-magenta', isHost: false }
+        ],
+        messages: [
+          {
+            id: 'm-narr-1',
+            sender: 'Chloe Bennett',
+            senderInitial: 'C',
+            isHost: true,
+            text: 'Character script dialogue notes uploaded from last week.',
+            timestamp: now - 86400000 * 5
+          }
+        ]
+      },
+      {
+        roomId: 'PROF-PRAC-05',
+        courseTopic: 'Professional Practices',
+        hostName: 'Marcus Brody',
+        createdAt: now - 86400000 * 12,
+        expiresAt: now - 86400000 * 11,
+        status: 'recent',
+        unreadCount: 0,
+        participants: [
+          { id: 'p13', name: 'Marcus Brody', initial: 'M', color: 'circle-color-navy', isHost: true },
+          { id: 'p14', name: 'Priya Sharma', initial: 'P', color: 'circle-color-lime', isHost: false },
+          { id: 'p15', name: 'Hannah Lee', initial: 'H', color: 'circle-color-cyan', isHost: false }
+        ],
+        messages: [
+          {
+            id: 'm-prof-1',
+            sender: 'Marcus Brody',
+            senderInitial: 'M',
+            isHost: true,
+            text: 'Portfolio critique rubric and presentation deck links.',
+            timestamp: now - 86400000 * 12
+          }
+        ]
       }
     ];
   }
 
   function getAllRooms() {
+    let rooms = [];
     try {
       const stored = localStorage.getItem(ROOMS_STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        rooms = JSON.parse(stored);
       }
     } catch (e) {
       console.warn('Error reading rooms from storage.', e);
     }
     const seed = getInitialSeedRooms();
-    saveAllRooms(seed);
-    return seed;
+    if (!rooms || rooms.length === 0) {
+      saveAllRooms(seed);
+      return seed;
+    }
+    // Ensure all Figma 38:1238 seed rooms are present
+    let updated = false;
+    seed.forEach(sRoom => {
+      if (!rooms.some(r => r.roomId === sRoom.roomId)) {
+        rooms.push(sRoom);
+        updated = true;
+      }
+    });
+    if (updated) {
+      saveAllRooms(rooms);
+    }
+    return rooms;
   }
 
   function saveAllRooms(rooms) {
@@ -242,7 +352,7 @@
   function purgeExpiredRooms() {
     const now = Date.now();
     let rooms = getAllRooms();
-    const remaining = rooms.filter(r => r.expiresAt > now);
+    const remaining = rooms.filter(r => r.status === 'recent' || r.expiresAt > now || (r.createdAt && r.createdAt > now - 30 * 86400000));
     if (remaining.length !== rooms.length) {
       saveAllRooms(remaining);
       renderRoomsList();
@@ -450,6 +560,126 @@
     }
   }
 
+  // State for accessibility speech tools and privacy settings
+  let ttsEnabled = false;
+  let activeFilterTab = 'active';
+  const roomPrivacySettings = {}; // maps roomId -> boolean (true = shared, false = anonymous)
+
+  // Web Speech API: Text-to-Speech playback
+  function speakText(text) {
+    if (!('speechSynthesis' in window) || !text) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.lang = 'en-US';
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      console.warn('Text to speech error:', err);
+    }
+  }
+
+  // Web Speech API: Speech-to-Text Voice Dictation
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  function setupSpeechRecognition(targetInputId, triggerBtnId) {
+    const triggerBtn = document.getElementById(triggerBtnId);
+    const targetInput = document.getElementById(targetInputId);
+    if (!triggerBtn || !targetInput) return;
+
+    if (!SpeechRecognition) {
+      triggerBtn.title = 'Speech recognition not supported in this browser';
+      triggerBtn.style.opacity = '0.4';
+      return;
+    }
+
+    let recognition = null;
+    let isListening = false;
+
+    triggerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (isListening && recognition) {
+        recognition.stop();
+        return;
+      }
+
+      try {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+          isListening = true;
+          triggerBtn.classList.add('recording');
+          targetInput.placeholder = '🎙️ Listening... speak now';
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          if (targetInput) {
+            targetInput.value = (targetInput.value ? targetInput.value + ' ' : '') + transcript;
+            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        };
+
+        recognition.onerror = (err) => {
+          console.warn('Speech recognition error:', err.error);
+          isListening = false;
+          triggerBtn.classList.remove('recording');
+        };
+
+        recognition.onend = () => {
+          isListening = false;
+          triggerBtn.classList.remove('recording');
+          if (targetInputId === 'chat-input') {
+            targetInput.placeholder = 'Type in message here...';
+          }
+        };
+
+        recognition.start();
+      } catch (err) {
+        console.warn('Could not start recognition:', err);
+        isListening = false;
+        triggerBtn.classList.remove('recording');
+      }
+    });
+  }
+
+  // Export Notes / Chat Transcript (Figma 38:1269 download action)
+  function exportChatNotes(roomId) {
+    const room = getRoomById(roomId);
+    if (!room) return;
+
+    let md = `# QuickChat Notes: ${room.courseTopic || 'Study Session'}\n`;
+    md += `**Room Code:** ${room.roomId}\n`;
+    md += `**Date:** ${new Date(room.createdAt).toLocaleDateString()} ${new Date(room.createdAt).toLocaleTimeString()}\n`;
+    md += `**Participants:** ${(room.participants || []).map(p => p.name).join(', ')}\n\n`;
+    md += `---\n\n`;
+
+    (room.messages || []).forEach(m => {
+      if (m.isSystem) {
+        md += `*System: ${m.text}*\n\n`;
+      } else {
+        const time = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        md += `**${m.sender}** (${time}):\n${m.text}\n\n`;
+      }
+    });
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(room.courseTopic || 'QuickChat').replace(/[^a-zA-Z0-9]/g, '_')}_Notes.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   function renderMessageStream(messages) {
     const container = document.getElementById('chat-messages-container');
     if (!container) return;
@@ -484,7 +714,29 @@
 
       const bubble = document.createElement('div');
       bubble.className = 'message-bubble';
-      bubble.textContent = msg.text;
+      
+      const msgTextSpan = document.createElement('span');
+      msgTextSpan.className = 'msg-text-content';
+      msgTextSpan.textContent = msg.text;
+      bubble.appendChild(msgTextSpan);
+
+      // Figma 30:891 Read-aloud button on message bubble
+      const speakBtn = document.createElement('button');
+      speakBtn.type = 'button';
+      speakBtn.className = 'btn-msg-speak';
+      speakBtn.title = 'Read aloud';
+      speakBtn.setAttribute('aria-label', 'Read message aloud');
+      speakBtn.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+      `;
+      speakBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        speakText(msg.text);
+      });
+      bubble.appendChild(speakBtn);
 
       const timeSpan = document.createElement('span');
       timeSpan.className = 'message-time';
@@ -507,8 +759,11 @@
 
     const profile = getProfileData();
     const guestIdentity = localStorage.getItem(GUEST_ID_KEY) || 'Nova Guest';
-    const senderName = isGuestInCurrentRoom ? guestIdentity : profile.fullName;
-    const senderInitial = senderName.charAt(0).toUpperCase();
+
+    // Privacy setting check: If anonymous is chosen for this room, mask identity
+    const isShared = roomPrivacySettings[currentActiveRoomId] !== false;
+    let senderName = isGuestInCurrentRoom ? guestIdentity : (isShared ? profile.fullName : 'Anonymous Student');
+    let senderInitial = isShared ? senderName.charAt(0).toUpperCase() : 'A';
 
     const newMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -550,8 +805,17 @@
     if (!listContainer) return;
 
     purgeExpiredRooms();
-    const rooms = getAllRooms();
+    const allRooms = getAllRooms();
     updateNavBadges();
+
+    const now = Date.now();
+    const rooms = allRooms.filter(r => {
+      if (activeFilterTab === 'active') {
+        return r.status !== 'recent' && (r.expiresAt ? r.expiresAt > now : true);
+      } else {
+        return r.status === 'recent' || (r.expiresAt && r.expiresAt <= now);
+      }
+    });
 
     if (rooms.length === 0) {
       listContainer.innerHTML = `
@@ -561,8 +825,10 @@
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
           </div>
-          <h4>No Active QuickChat Rooms</h4>
-          <p>Tap <strong>"Generate QR"</strong> above to launch an instant ephemeral chat for your course, group project, or campus meet!</p>
+          <h4>${activeFilterTab === 'active' ? 'No Active QuickChat Rooms' : 'No Past 30 Days Chats'}</h4>
+          <p>${activeFilterTab === 'active' 
+            ? 'Tap <strong>"Generate QR"</strong> above to launch an instant ephemeral chat for your course, group project, or campus meet!'
+            : 'Older collaborative chats from the last month will appear here for review.'}</p>
         </div>
       `;
       return;
@@ -1069,6 +1335,118 @@
       if (activeQRRoomId) {
         const room = getRoomById(activeQRRoomId);
         if (room) renderQRContent(room);
+      }
+    });
+
+    // Figma Working Prototype (38:1269 & 38:1305) Action Bar & Speech Tools
+    // 1. Export Notes
+    document.getElementById('btn-room-export')?.addEventListener('click', () => {
+      if (currentActiveRoomId) {
+        exportChatNotes(currentActiveRoomId);
+      }
+    });
+
+    // 2. Share Information Privacy Modal (Figma 38:1305)
+    const privacyModal = document.getElementById('privacy-share-modal-backdrop');
+    const choiceYes = document.getElementById('btn-privacy-choice-yes');
+    const choiceNo = document.getElementById('btn-privacy-choice-no');
+    let pendingPrivacyChoice = true;
+
+    document.getElementById('btn-room-share-info')?.addEventListener('click', () => {
+      if (!currentActiveRoomId) return;
+      pendingPrivacyChoice = roomPrivacySettings[currentActiveRoomId] !== false;
+      choiceYes?.classList.toggle('active', pendingPrivacyChoice);
+      choiceNo?.classList.toggle('active', !pendingPrivacyChoice);
+      privacyModal?.classList.add('open');
+      privacyModal?.setAttribute('aria-hidden', 'false');
+    });
+
+    choiceYes?.addEventListener('click', () => {
+      pendingPrivacyChoice = true;
+      choiceYes.classList.add('active');
+      choiceNo?.classList.remove('active');
+    });
+
+    choiceNo?.addEventListener('click', () => {
+      pendingPrivacyChoice = false;
+      choiceNo.classList.add('active');
+      choiceYes?.classList.remove('active');
+    });
+
+    document.getElementById('btn-close-privacy-modal')?.addEventListener('click', () => {
+      privacyModal?.classList.remove('open');
+      privacyModal?.setAttribute('aria-hidden', 'true');
+    });
+
+    document.getElementById('btn-confirm-privacy-choice')?.addEventListener('click', () => {
+      if (currentActiveRoomId) {
+        roomPrivacySettings[currentActiveRoomId] = pendingPrivacyChoice;
+        const badge = document.getElementById('room-privacy-status-indicator');
+        if (badge) {
+          badge.textContent = pendingPrivacyChoice ? '🔒 Privacy: Shared' : '🕶️ Privacy: Anonymous';
+        }
+      }
+      privacyModal?.classList.remove('open');
+      privacyModal?.setAttribute('aria-hidden', 'true');
+    });
+
+    // 3. Text-to-Speech Toggle (Figma 30:891 volume_up)
+    const ttsBtn = document.getElementById('btn-tts-toggle');
+    ttsBtn?.addEventListener('click', () => {
+      ttsEnabled = !ttsEnabled;
+      ttsBtn.classList.toggle('active', ttsEnabled);
+      if (ttsEnabled) {
+        speakText('Text-to-speech auto readout active');
+      } else {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      }
+    });
+
+    // 4. Voice Dictation via Web Speech API (Figma 30:897 mic)
+    setupSpeechRecognition('chat-input', 'btn-mic-input');
+    setupSpeechRecognition('login-input-name', 'btn-login-name-mic');
+    setupSpeechRecognition('login-input-pronouns', 'btn-login-pronouns-mic');
+
+    // 5. Figma 48:268 Pronouns Combobox Dropdown Logic
+    const pronounsBox = document.getElementById('login-pronouns-combobox');
+    const pronounsInput = document.getElementById('login-input-pronouns');
+    const pronounsToggle = document.getElementById('btn-login-pronouns-toggle');
+    const pronounsOptions = document.querySelectorAll('#login-pronouns-menu .combobox-option');
+
+    const toggleCombobox = (openState) => {
+      if (openState === undefined) {
+        pronounsBox?.classList.toggle('open');
+      } else if (openState) {
+        pronounsBox?.classList.add('open');
+      } else {
+        pronounsBox?.classList.remove('open');
+      }
+    };
+
+    pronounsToggle?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCombobox();
+    });
+
+    pronounsInput?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCombobox(true);
+    });
+
+    pronounsOptions.forEach(opt => {
+      opt.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const val = opt.getAttribute('data-value');
+        if (pronounsInput) pronounsInput.value = val;
+        pronounsOptions.forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        toggleCombobox(false);
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (pronounsBox && !pronounsBox.contains(e.target)) {
+        toggleCombobox(false);
       }
     });
 

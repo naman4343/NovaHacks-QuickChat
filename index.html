@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <title>QuickChat - Barrier-Free Campus & Event Chats | NovaHacks</title>
   <meta name="description" content="QuickChat: Impromptu student chat rooms via QR codes, course topic tags, and accessible profiles for Nova Design Hackathon.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -124,16 +124,54 @@
           <!-- Login Form Card (Rectangles 6, 7, 8, 9 in Figma 16:83) -->
           <form id="login-form" class="figma-login-form">
             
-            <!-- Field 1: Name -->
+            <!-- Field 1: Name (Figma 38:1408 Frame 15 with voice mic) -->
             <div class="figma-input-wrapper">
               <label for="login-input-name" class="figma-input-label">Name</label>
-              <input type="text" id="login-input-name" class="figma-input-field" placeholder="Enter your full name" required>
+              <div class="input-with-action">
+                <input type="text" id="login-input-name" class="figma-input-field" placeholder="Enter name/nickname" required>
+                <button type="button" class="field-action-btn btn-field-mic" id="btn-login-name-mic" title="Voice dictation (Speech-to-Text)" aria-label="Speak your name">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" y1="19" x2="12" y2="23"/>
+                    <line x1="8" y1="23" x2="16" y2="23"/>
+                  </svg>
+                </button>
+              </div>
             </div>
 
-            <!-- Field 2: Pronouns -->
+            <!-- Field 2: Pronouns (Figma 38:1408 Frame 16 & Combobox UI 48:268) -->
             <div class="figma-input-wrapper">
               <label for="login-input-pronouns" class="figma-input-label">Pronouns</label>
-              <input type="text" id="login-input-pronouns" class="figma-input-field" placeholder="e.g. she / her, they / them">
+              <div class="figma-combobox" id="login-pronouns-combobox">
+                <div class="combobox-input-wrap">
+                  <input type="text" id="login-input-pronouns" class="figma-input-field combobox-input" placeholder="Select your pronouns" autocomplete="off">
+                  <div class="combobox-actions">
+                    <button type="button" class="field-action-btn btn-field-mic" id="btn-login-pronouns-mic" title="Voice dictation" aria-label="Speak pronouns">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8" y1="23" x2="16" y2="23"/>
+                      </svg>
+                    </button>
+                    <button type="button" class="field-action-btn btn-combobox-toggle" id="btn-login-pronouns-toggle" title="Toggle dropdown" aria-label="Choose pronoun options">
+                      <!-- Figma 48:239 keyboard_arrow_down -->
+                      <svg class="chevron-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="combobox-menu" id="login-pronouns-menu" role="listbox" aria-hidden="true">
+                  <button type="button" class="combobox-option" data-value="she / her">She / her</button>
+                  <button type="button" class="combobox-option" data-value="he / him">He / him</button>
+                  <button type="button" class="combobox-option" data-value="they / them">They / them</button>
+                  <button type="button" class="combobox-option" data-value="she / they">She / they</button>
+                  <button type="button" class="combobox-option" data-value="he / they">He / they</button>
+                  <button type="button" class="combobox-option" data-value="prefer not to say">Prefer not to say</button>
+                </div>
+              </div>
             </div>
 
             <!-- Field 3: Course -->
@@ -249,27 +287,37 @@
               </div>
             </div>
 
-            <!-- Action Buttons from Figma Frame 1 (20:53) -->
+            <!-- Action Buttons from Figma Working Prototype (38:1269 & Frame 1 20:53) -->
             <div class="action-bar-right">
+              <!-- Figma 38:1068 groups_2 "Share Information" privacy sheet -->
+              <button class="figma-action-btn btn-share-info" id="btn-room-share-info" title="Control your shared profile & privacy (Figma 38:1305)">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span>Share Info</span>
+              </button>
+
+              <!-- Figma download icon (Screen 38:1269) -->
+              <button class="figma-action-btn btn-export-notes" id="btn-room-export" title="Export notes and chat transcript">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Export</span>
+              </button>
+
               <button class="figma-action-btn btn-add-users" id="btn-room-add-users" title="Add users via QR code">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
                 </svg>
-                <span>Add Users</span>
+                <span>Invite QR</span>
               </button>
 
-              <button class="figma-action-btn btn-remove-user" id="btn-room-remove-user" title="Participant management">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/>
-                </svg>
-                <span>Remove</span>
-              </button>
-
+              <!-- Figma 38:971 delete icon -->
               <button class="figma-action-btn btn-delete-chat" id="btn-room-delete-chat" title="End conversation and wipe messages">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                   <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
                 </svg>
-                <span>Delete Chat</span>
+                <span>Delete</span>
               </button>
             </div>
           </div>
@@ -277,6 +325,7 @@
           <!-- TTL Countdown Banner -->
           <div class="room-ttl-strip">
             <span>⏳ Ephemeral Room • Auto-deletes in: <strong id="room-ttl-countdown">23h 59m left</strong></span>
+            <span class="privacy-status-badge" id="room-privacy-status-indicator" title="Current student identity sharing setting">🔒 Privacy: Shared</span>
           </div>
 
           <!-- Messages Stream -->
@@ -292,9 +341,32 @@
             <button class="chip-btn" data-text="Let's wrap up and delete this room! ✨">Wrap up & delete ✨</button>
           </div>
 
-          <!-- Message Composer Bar (Figma Text Bar 16:153) -->
+          <!-- Message Composer Bar with Accessible Speech Tools (Figma 38:1269) -->
           <form class="chat-composer-bar" id="chat-composer-form">
-            <input type="text" id="chat-input" placeholder="Text Bar — type a message..." autocomplete="off" required>
+            <div class="composer-accessibility-actions">
+              <button type="button" class="composer-icon-btn btn-composer-tts" id="btn-tts-toggle" title="Read messages aloud (Text-to-Speech)" aria-label="Toggle text to speech">
+                <!-- volume_up icon from Figma 30:891 -->
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="composer-input-wrapper">
+              <input type="text" id="chat-input" placeholder="Type in message here..." autocomplete="off" required>
+              
+              <!-- mic icon from Figma 30:897 -->
+              <button type="button" class="composer-icon-btn btn-composer-mic" id="btn-mic-input" title="Voice typing (Speech-to-Text)" aria-label="Speech to text input">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+              </button>
+            </div>
+
             <button type="submit" class="btn-send-message" id="btn-send" aria-label="Send Message">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="22" y1="2" x2="11" y2="13"/>
@@ -632,6 +704,62 @@
               <button type="submit" class="btn-primary btn-save">Create Profile</button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- MODAL 6: FIGMA 38:1305 PRIVACY CONSENT SHEET ("Information shared") -->
+      <div class="modal-backdrop" id="privacy-share-modal-backdrop" aria-hidden="true">
+        <div class="edit-modal-sheet privacy-consent-card" role="dialog" aria-modal="true">
+          <div class="modal-header">
+            <div class="qr-modal-header-text">
+              <span class="section-badge">Participant Identity</span>
+              <h3 id="privacy-modal-title">Information shared</h3>
+            </div>
+            <button class="modal-close-btn" id="btn-close-privacy-modal" aria-label="Close dialog">✕</button>
+          </div>
+
+          <div class="privacy-consent-content">
+            <p class="privacy-consent-desc">
+              Control how classmates see you in this room. You can share your student profile or participate completely anonymously.
+            </p>
+
+            <div class="privacy-choice-group">
+              <!-- Option 1: Figma 38:1305 Check / Yes I want to share -->
+              <button type="button" class="privacy-choice-card active" id="btn-privacy-choice-yes">
+                <div class="choice-icon-wrap icon-check">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+                <div class="choice-details">
+                  <strong class="choice-title">Yes I want to share</strong>
+                  <span class="choice-subtext">Displays your name, pronouns, and course badge so classmates can recognize you.</span>
+                </div>
+                <span class="choice-selected-indicator">✓</span>
+              </button>
+
+              <!-- Option 2: Figma 38:1305 Close / No don't share my information -->
+              <button type="button" class="privacy-choice-card" id="btn-privacy-choice-no">
+                <div class="choice-icon-wrap icon-close">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </div>
+                <div class="choice-details">
+                  <strong class="choice-title">No don’t share my information</strong>
+                  <span class="choice-subtext">Stay completely anonymous. Your messages will show as "Anonymous Student" with a generic avatar.</span>
+                </div>
+                <span class="choice-selected-indicator"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-primary btn-block" id="btn-confirm-privacy-choice">
+              <span>Save Privacy Setting</span>
+            </button>
+          </div>
         </div>
       </div>
 

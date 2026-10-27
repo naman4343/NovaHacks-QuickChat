@@ -57,15 +57,21 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
   background: radial-gradient(circle at 10% 20%, #060b18 0%, #002547 50%, #0a1127 100%);
+  overscroll-behavior-y: none;
 }
 
 .app-layout {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
   display: flex;
   background: var(--surface-app);
   position: relative;
+  overflow: hidden;
 }
 
 /* ==========================================================================
@@ -897,11 +903,30 @@ body {
 
 /* Small Phones (< 480px) */
 @media (max-width: 480px) {
+  /* Real mobile devices should NEVER render a fake iOS notch or clock */
   .mobile-status-bar {
-    display: flex;
+    display: none !important;
+  }
+  .app-layout {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+  .main-viewport {
+    height: 100dvh;
+    min-height: 100dvh;
   }
   .profile-scroll-container {
     padding: 16px 14px 96px;
+  }
+  .app-topbar {
+    padding: 10px 14px;
+    padding-top: max(10px, env(safe-area-inset-top, 10px));
+  }
+  .mobile-bottom-dock {
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  }
+  .chat-composer-bar {
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
   }
 }
 
@@ -1692,6 +1717,26 @@ select.figma-input-field {
   transition: all 0.15s ease;
 }
 
+.btn-share-info {
+  background: rgba(0, 159, 189, 0.12);
+  color: var(--figma-cyan-dark);
+}
+
+.btn-share-info:hover {
+  background: var(--figma-cyan-dark);
+  color: #fff;
+}
+
+.btn-export-notes {
+  background: rgba(199, 219, 49, 0.22);
+  color: #4b5800;
+}
+
+.btn-export-notes:hover {
+  background: var(--figma-lime);
+  color: #1a2233;
+}
+
 .btn-add-users {
   background: rgba(0, 55, 103, 0.08);
   color: var(--figma-navy);
@@ -1862,29 +1907,93 @@ select.figma-input-field {
 .chat-composer-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px 24px;
+  gap: 8px;
+  padding: 10px 14px max(14px, env(safe-area-inset-bottom, 14px));
   background: #ffffff;
   border-top: 1px solid rgba(0, 55, 103, 0.08);
   z-index: 10;
 }
 
-#chat-input {
+.composer-accessibility-actions {
+  display: flex;
+  align-items: center;
+}
+
+.composer-input-wrapper {
   flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.composer-input-wrapper #chat-input {
+  width: 100%;
   font-family: var(--font-body);
   font-size: 14px;
-  padding: 12px 16px;
+  padding: 12px 42px 12px 16px;
   border-radius: 24px;
   border: 1.5px solid #dbe2ea;
   outline: none;
   background: #f8fafc;
   color: #1a2233;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-#chat-input:focus {
+.composer-input-wrapper #chat-input:focus {
   border-color: var(--figma-cyan-dark);
   background: #ffffff;
+}
+
+.composer-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: var(--figma-navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.composer-icon-btn:hover {
+  background: rgba(0, 159, 189, 0.15);
+  color: var(--figma-cyan-dark);
+}
+
+.btn-composer-tts.active {
+  background: linear-gradient(135deg, var(--figma-cyan-dark), var(--figma-teal));
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 159, 189, 0.35);
+}
+
+.btn-composer-mic {
+  position: absolute;
+  right: 6px;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  color: var(--figma-slate);
+}
+
+.btn-composer-mic:hover {
+  color: var(--figma-magenta);
+  background: rgba(207, 43, 116, 0.08);
+}
+
+.btn-composer-mic.recording {
+  background: var(--figma-magenta) !important;
+  color: #ffffff !important;
+  animation: pulse-mic 1.2s infinite;
+}
+
+@keyframes pulse-mic {
+  0% { box-shadow: 0 0 0 0 rgba(207, 43, 116, 0.6); }
+  70% { box-shadow: 0 0 0 10px rgba(207, 43, 116, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(207, 43, 116, 0); }
 }
 
 .btn-send-message {
@@ -1901,6 +2010,31 @@ select.figma-input-field {
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(207, 43, 116, 0.3);
   transition: transform 0.15s ease;
+}
+
+.btn-send-message:hover {
+  transform: scale(1.08);
+}
+
+/* Individual message speak button */
+.btn-msg-speak {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.5;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+
+.btn-msg-speak:hover {
+  opacity: 1;
+  transform: scale(1.15);
 }
 
 .btn-send-message:hover {
@@ -2238,5 +2372,265 @@ select.figma-input-field {
   font-size: 13px;
   color: var(--figma-slate);
   line-height: 1.45;
+}
+
+/* ==========================================================================
+   Figma Combobox UI (48:268 & 38:1408) & Voice Mic Inputs
+   ========================================================================== */
+.input-with-action {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-with-action input {
+  width: 100%;
+  padding-right: 44px !important;
+}
+
+.field-action-btn {
+  position: absolute;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--figma-slate);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  z-index: 2;
+}
+
+.field-action-btn:hover {
+  color: var(--figma-navy);
+  background: rgba(0, 55, 103, 0.08);
+}
+
+.field-action-btn.recording {
+  background: var(--figma-magenta) !important;
+  color: #fff !important;
+  animation: pulse-mic 1.2s infinite;
+}
+
+.figma-combobox {
+  position: relative;
+  width: 100%;
+}
+
+.combobox-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.combobox-input {
+  width: 100%;
+  padding-right: 76px !important;
+  cursor: pointer;
+}
+
+.combobox-actions {
+  position: absolute;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  z-index: 2;
+}
+
+.btn-combobox-toggle {
+  position: static;
+  width: 32px;
+  height: 32px;
+}
+
+.chevron-arrow {
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.figma-combobox.open .chevron-arrow {
+  transform: rotate(180deg);
+}
+
+.combobox-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 55, 103, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 16px 36px rgba(0, 55, 103, 0.18);
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 100;
+  animation: dropdownSlide 0.18s ease forwards;
+}
+
+.figma-combobox.open .combobox-menu {
+  display: flex;
+}
+
+@keyframes dropdownSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.combobox-option {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--figma-dark-slate);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.combobox-option:hover {
+  background: rgba(0, 159, 189, 0.08);
+  color: var(--figma-cyan-dark);
+}
+
+.combobox-option.selected {
+  background: linear-gradient(135deg, rgba(0, 55, 103, 0.08), rgba(207, 43, 116, 0.08));
+  color: var(--figma-magenta);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Figma 38:1305 Privacy Consent Sheet ("Information shared")
+   ========================================================================== */
+.privacy-consent-card {
+  max-width: 440px;
+}
+
+.privacy-consent-desc {
+  font-size: 13px;
+  color: var(--figma-slate);
+  line-height: 1.45;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.privacy-choice-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.privacy-choice-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 2px solid rgba(0, 55, 103, 0.1);
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  position: relative;
+  width: 100%;
+}
+
+.privacy-choice-card:hover {
+  border-color: rgba(0, 159, 189, 0.4);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.privacy-choice-card.active {
+  border-color: var(--figma-navy);
+  background: rgba(0, 55, 103, 0.03);
+  box-shadow: 0 4px 16px rgba(0, 55, 103, 0.1);
+}
+
+.choice-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-check {
+  background: rgba(199, 219, 49, 0.25);
+  color: #4b5800;
+}
+
+.icon-close {
+  background: rgba(207, 43, 116, 0.14);
+  color: var(--figma-magenta);
+}
+
+.choice-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.choice-title {
+  font-family: var(--font-heading);
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--figma-navy);
+}
+
+.choice-subtext {
+  font-size: 11.5px;
+  color: var(--figma-slate);
+  line-height: 1.35;
+}
+
+.choice-selected-indicator {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--figma-navy);
+  width: 24px;
+  text-align: center;
+}
+
+.privacy-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--figma-navy);
+  background: rgba(0, 55, 103, 0.08);
+  padding: 3px 8px;
+  border-radius: 8px;
+  margin-left: auto;
+  border: 1px solid rgba(0, 55, 103, 0.1);
+}
+
+/* ==========================================================================
+   Mobile Touch Ergonomics & Tap Optimization (WCAG 2.5.5)
+   ========================================================================== */
+button, input, select, textarea, .sidebar-item, .dock-tab, .figma-action-btn, .chip-btn, .privacy-choice-card, .combobox-option {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Smooth message scrolling with momentum */
+.chat-messages-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
