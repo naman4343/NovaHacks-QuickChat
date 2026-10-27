@@ -30,6 +30,13 @@
     console.warn('BroadcastChannel not supported in this environment.', e);
   }
 
+  // Unique client identity for distinguishing sent messages (ChatWave format)
+  const myClientId = localStorage.getItem('cw-client-id') || (() => {
+    const id = (globalThis.crypto?.randomUUID?.()) || `client-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    try { localStorage.setItem('cw-client-id', id); } catch (e) {}
+    return id;
+  })();
+
   // --------------------------------------------------------------------------
   // 1. Profile State & Onboarding (Figma 16:83)
   // --------------------------------------------------------------------------
@@ -581,34 +588,84 @@
 
   // State for accessibility speech tools and privacy settings
   let ttsEnabled = false;
+  let currentSpeechButton = null;
+  let currentUtterance = null;
   const roomPrivacySettings = {}; // maps roomId -> boolean (true = shared, false = anonymous)
 
-  // Web Speech API: Text-to-Speech playback
+  function stopSpeaking() {
+    if (currentSpeechButton) {
+      currentSpeechButton.setAttribute('aria-pressed', 'false');
+      currentSpeechButton.textContent = 'Listen';
+    }
+    currentSpeechButton = null;
+    currentUtterance = null;
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }
+
+  function speakMessage(button, text) {
+    if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+      const voiceStatus = document.getElementById('voiceStatus');
+      if (voiceStatus) voiceStatus.textContent = 'Text-to-speech is not supported in this browser.';
+      return;
+    }
+    if (currentSpeechButton === button && window.speechSynthesis.speaking) {
+      stopSpeaking();
+      return;
+    }
+    stopSpeaking();
+    try {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = navigator.language || 'en-US';
+      currentUtterance = utterance;
+      currentSpeechButton = button;
+      button.setAttribute('aria-pressed', 'true');
+      button.textContent = 'Stop';
+      utterance.onend = () => {
+        if (currentUtterance === utterance) stopSpeaking();
+      };
+      utterance.onerror = () => {
+        if (currentUtterance === utterance) {
+          stopSpeaking();
+          const voiceStatus = document.getElementById('voiceStatus');
+          if (voiceStatus) voiceStatus.textContent = 'Could not read this message aloud.';
+        }
+      };
+      window.speechSynthesis.speak(utterance);
+    } catch (e) {
+      stopSpeaking();
+    }
+  }
+
+  // Web Speech API: General Text-to-Speech playback
   function speakText(text) {
     if (!('speechSynthesis' in window) || !text) return;
     try {
-      window.speechSynthesis.cancel();
+      stopSpeaking();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
-      utterance.lang = 'en-US';
+      utterance.lang = navigator.language || 'en-US';
       window.speechSynthesis.speak(utterance);
     } catch (err) {
       console.warn('Text to speech error:', err);
     }
   }
 
-  // Web Speech API: Speech-to-Text Voice Dictation
+  // Web Speech API: Speech-to-Text Voice Dictation (ChatWave & Figma)
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   function setupSpeechRecognition(targetInputId, triggerBtnId) {
     const triggerBtn = document.getElementById(triggerBtnId);
     const targetInput = document.getElementById(targetInputId);
+    const voiceStatus = document.getElementById('voiceStatus');
     if (!triggerBtn || !targetInput) return;
 
     if (!SpeechRecognition) {
       triggerBtn.title = 'Speech recognition not supported in this browser';
       triggerBtn.style.opacity = '0.4';
+      if (voiceStatus && targetInputId === 'chat-input') {
+        voiceStatus.textContent = 'Voice dictation is not supported in this browser. You can still type your message.';
+      }
       return;
     }
 
@@ -626,21 +683,30 @@
 
       try {
         recognition = new SpeechRecognition();
-        recognition.lang = 'en-US';
+        recognition.lang = navigator.language || 'en-US';
+        recognition.continuous = false;
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
 
         recognition.onstart = () => {
           isListening = true;
           triggerBtn.classList.add('recording');
+          triggerBtn.setAttribute('aria-pressed', 'true');
           targetInput.placeholder = '🎙️ Listening... speak now';
+          if (voiceStatus && targetInputId === 'chat-input') {
+            voiceStatus.textContent = 'Listening… Speak your message.';
+          }
         };
 
         recognition.onresult = (event) => {
-          const transcript = event.results[0][0].transcript;
-          if (targetInput) {
-            targetInput.value = (targetInput.value ? targetInput.value + ' ' : '') + transcript;
+          const transcript = Array.from(event.results).slice(event.resultIndex).map(res => res[0].transcript).join(' ').trim();
+          if (targetInput && transcript) {
+            const separator = targetInput.value.trim() ? ' ' : '';
+            targetInput.value = targetInput.value + separator + transcript;
             targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+            if (voiceStatus && targetInputId === 'chat-input') {
+              voiceStatus.textContent = 'Added dictated text. Review it, then tap send.';
+            }
           }
         };
 
@@ -648,13 +714,28 @@
           console.warn('Speech recognition error:', err.error);
           isListening = false;
           triggerBtn.classList.remove('recording');
+          triggerBtn.setAttribute('aria-pressed', 'false');
+          const messages = {
+            'not-allowed': 'Microphone access was denied. Allow microphone access in your browser settings.',
+            'service-not-allowed': 'The browser speech-recognition service is unavailable.',
+            'no-speech': 'No speech was detected. Tap the microphone to try again.',
+            'audio-capture': 'No microphone was found. Check your device microphone.',
+            'network': 'Voice recognition needs an internet connection.'
+          };
+          if (voiceStatus && targetInputId === 'chat-input') {
+            voiceStatus.textContent = messages[err.error] || 'Voice dictation failed. Please try again or type your message.';
+          }
         };
 
         recognition.onend = () => {
           isListening = false;
           triggerBtn.classList.remove('recording');
+          triggerBtn.setAttribute('aria-pressed', 'false');
           if (targetInputId === 'chat-input') {
             targetInput.placeholder = 'Type in message here...';
+            if (voiceStatus && voiceStatus.textContent.startsWith('Listening')) {
+              voiceStatus.textContent = 'Voice input stopped.';
+            }
           }
         };
 
@@ -663,6 +744,7 @@
         console.warn('Could not start recognition:', err);
         isListening = false;
         triggerBtn.classList.remove('recording');
+        triggerBtn.setAttribute('aria-pressed', 'false');
       }
     });
   }
@@ -682,8 +764,10 @@
       if (m.isSystem) {
         md += `*System: ${m.text}*\n\n`;
       } else {
-        const time = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        md += `**${m.sender}** (${time}):\n${m.text}\n\n`;
+        const author = m.author || m.sender || 'Anonymous';
+        const msgTime = m.at ? new Date(m.at) : (m.timestamp ? new Date(m.timestamp) : new Date());
+        const time = msgTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        md += `**${author}** (${time}):\n${m.text}\n\n`;
       }
     });
 
@@ -698,73 +782,80 @@
     URL.revokeObjectURL(url);
   }
 
+  const safe = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
   function renderMessageStream(messages) {
     const container = document.getElementById('chat-messages-container');
     if (!container) return;
+    stopSpeaking();
     container.innerHTML = '';
 
-    messages.forEach(msg => {
+    // Date/Conversation pill from ChatWave format
+    const datePill = document.createElement('span');
+    datePill.className = 'date-pill';
+    datePill.textContent = 'Conversation';
+    container.appendChild(datePill);
+
+    (messages || []).forEach(msg => {
       if (msg.isSystem) {
         const sysDiv = document.createElement('div');
-        sysDiv.className = 'system-notice-bubble';
+        sysDiv.className = 'date-pill system-pill';
         sysDiv.textContent = msg.text;
         container.appendChild(sysDiv);
         return;
       }
 
-      const row = document.createElement('div');
-      const isMine = isGuestInCurrentRoom ? !msg.isHost : msg.isHost;
-      row.className = `message-row ${isMine ? 'msg-host' : 'msg-guest'}`;
+      const isMine = msg.senderId ? (msg.senderId === myClientId) : (isGuestInCurrentRoom ? !msg.isHost : msg.isHost);
+      const authorName = msg.author || msg.sender || (isMine ? 'You' : 'Anonymous Student');
+      const authorInitial = msg.senderInitial || (authorName || 'U').charAt(0).toUpperCase();
 
-      const senderCluster = document.createElement('div');
-      senderCluster.className = 'message-sender-cluster';
+      const msgEl = document.createElement('div');
+      msgEl.className = `message ${isMine ? 'mine' : ''}`;
 
-      const miniInitial = document.createElement('div');
-      miniInitial.className = `mini-initial-circle ${isMine ? 'circle-color-navy' : 'circle-color-magenta'}`;
-      miniInitial.textContent = msg.senderInitial || (msg.sender || 'U').charAt(0).toUpperCase();
+      // Author header (ChatWave format)
+      const authorEl = document.createElement('div');
+      authorEl.className = 'author';
+      const initialDot = document.createElement('span');
+      initialDot.className = 'author-avatar-dot';
+      initialDot.textContent = authorInitial;
+      const authorText = document.createElement('span');
+      authorText.textContent = isMine ? 'You' : authorName;
+      authorEl.appendChild(initialDot);
+      authorEl.appendChild(authorText);
 
-      const senderSpan = document.createElement('span');
-      senderSpan.className = 'message-sender';
-      senderSpan.textContent = isMine ? 'You' : msg.sender;
+      // Message text with line breaks (ChatWave format)
+      const textEl = document.createElement('div');
+      textEl.className = 'message-text';
+      textEl.innerHTML = safe(msg.text).replace(/\n/g, '<br>');
 
-      senderCluster.appendChild(miniInitial);
-      senderCluster.appendChild(senderSpan);
+      // Message footer (Listen speech button + timestamp)
+      const footerEl = document.createElement('div');
+      footerEl.className = 'message-footer';
 
-      const bubble = document.createElement('div');
-      bubble.className = 'message-bubble';
-      
-      const msgTextSpan = document.createElement('span');
-      msgTextSpan.className = 'msg-text-content';
-      msgTextSpan.textContent = msg.text;
-      bubble.appendChild(msgTextSpan);
-
-      // Figma 30:891 Read-aloud button on message bubble
       const speakBtn = document.createElement('button');
       speakBtn.type = 'button';
-      speakBtn.className = 'btn-msg-speak';
-      speakBtn.title = 'Read aloud';
-      speakBtn.setAttribute('aria-label', 'Read message aloud');
-      speakBtn.innerHTML = `
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-        </svg>
-      `;
+      speakBtn.className = 'speak-message';
+      speakBtn.setAttribute('aria-label', `Read message from ${safe(authorName)} aloud`);
+      speakBtn.setAttribute('aria-pressed', 'false');
+      speakBtn.textContent = 'Listen';
       speakBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        speakText(msg.text);
+        speakMessage(speakBtn, msg.text);
       });
-      bubble.appendChild(speakBtn);
 
-      const timeSpan = document.createElement('span');
-      timeSpan.className = 'message-time';
-      const msgDate = new Date(msg.timestamp);
-      timeSpan.textContent = msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const timeEl = document.createElement('div');
+      timeEl.className = 'footer';
+      const msgDate = msg.at ? new Date(msg.at) : (msg.timestamp ? new Date(msg.timestamp) : new Date());
+      timeEl.textContent = msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-      row.appendChild(senderCluster);
-      row.appendChild(bubble);
-      row.appendChild(timeSpan);
-      container.appendChild(row);
+      footerEl.appendChild(speakBtn);
+      footerEl.appendChild(timeEl);
+
+      msgEl.appendChild(authorEl);
+      msgEl.appendChild(textEl);
+      msgEl.appendChild(footerEl);
+
+      container.appendChild(msgEl);
     });
 
     container.scrollTop = container.scrollHeight;
@@ -783,13 +874,17 @@
     let senderName = isGuestInCurrentRoom ? guestIdentity : (isShared ? profile.fullName : 'Anonymous Student');
     let senderInitial = isShared ? senderName.charAt(0).toUpperCase() : 'A';
 
+    const now = Date.now();
     const newMessage = {
-      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      id: (globalThis.crypto?.randomUUID?.()) || `msg-${now}-${Math.random().toString(36).substring(2, 6)}`,
+      author: senderName,
       sender: senderName,
       senderInitial: senderInitial,
+      senderId: myClientId,
       isHost: !isGuestInCurrentRoom,
       text: text.trim(),
-      timestamp: Date.now()
+      at: new Date(now).toISOString(),
+      timestamp: now
     };
 
     room.messages.push(newMessage);
@@ -797,6 +892,10 @@
     saveAllRooms(allRooms);
 
     renderMessageStream(room.messages);
+
+    if (ttsEnabled) {
+      speakText(newMessage.text);
+    }
 
     // Sync via broadcastChannel for same-browser tabs
     broadcastMessage({

@@ -328,8 +328,8 @@
             <span class="privacy-status-badge" id="room-privacy-status-indicator" title="Current student identity sharing setting">🔒 Privacy: Shared</span>
           </div>
 
-          <!-- Messages Stream -->
-          <div class="chat-messages-scroll" id="chat-messages-container">
+          <!-- Messages Stream (ChatWave format: .messages role="log" aria-live="polite") -->
+          <div class="chat-messages-scroll messages" id="chat-messages-container" role="log" aria-live="polite">
             <!-- Messages injected dynamically -->
           </div>
 
@@ -341,7 +341,7 @@
             <button class="chip-btn" data-text="Let's wrap up and delete this room! ✨">Wrap up & delete ✨</button>
           </div>
 
-          <!-- Message Composer Bar with Accessible Speech Tools (Figma 38:1269) -->
+          <!-- Message Composer Bar with Accessible Speech Tools (Figma 38:1269 & ChatWave Dictation) -->
           <form class="chat-composer-bar" id="chat-composer-form">
             <div class="composer-accessibility-actions">
               <button type="button" class="composer-icon-btn btn-composer-tts" id="btn-tts-toggle" title="Read messages aloud (Text-to-Speech)" aria-label="Toggle text to speech">
@@ -374,6 +374,9 @@
               </svg>
             </button>
           </form>
+
+          <div class="voice-status" id="voiceStatus" role="status" aria-live="polite"></div>
+          <div class="subhint">Tap the microphone to dictate. Use the Listen button on a message to hear it read aloud.</div>
 
         </div>
       </section>
