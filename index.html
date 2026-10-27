@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>QuickChat - Student Profile | NovaHacks</title>
+  <meta name="description" content="QuickChat Student Profile for Nova Design Hackathon - responsive across desktop, tablet, and mobile.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;400;600;700;800&family=Merriweather:wght@400;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Desktop / Global App Wrapper -->
+  <div class="app-layout">
+    
+    <!-- Sidebar Navigation (Active on Desktop & Tablet) -->
+    <aside class="desktop-sidebar" aria-label="Sidebar navigation">
+      <div class="sidebar-brand">
+        <img src="assets/logo.png" alt="QuickChat Logo" class="brand-logo">
+        <span class="brand-text">QuickChat</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="sidebar-item" id="sidebar-chats">
+          <img src="assets/chat.svg" alt="Chats" class="sidebar-icon">
+          <span>Messages</span>
+        </button>
+        <button class="sidebar-item active" id="sidebar-profile">
+          <img src="assets/person.png" alt="Profile" class="sidebar-icon-img">
+          <span>My Profile</span>
+        </button>
+        <button class="sidebar-item" id="sidebar-settings">
+          <img src="assets/settings.svg" alt="Settings" class="sidebar-icon">
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="event-badge">
+          <span class="pulse-dot"></span>
+          <span>NovaHacks 2026</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Shell (Fluidly adapts across all viewport sizes) -->
+    <main class="main-viewport" id="app-screen">
+      
+      <!-- Mobile-only simulated status bar -->
+      <header class="mobile-status-bar" aria-hidden="true">
+        <span class="status-time" id="status-time">9:41</span>
+        <div class="notch-pill"></div>
+        <div class="status-icons">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+            <path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.23 19.57 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/>
+          </svg>
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+            <path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z"/>
+          </svg>
+          <div class="battery-icon"><span class="battery-level"></span></div>
+        </div>
+      </header>
+
+      <!-- App Header / Top Navigation Bar -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="icon-button" id="btn-back" aria-label="Go back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          <div class="mobile-brand">
+            <img src="assets/logo.png" alt="QuickChat Logo" class="brand-icon">
+            <span class="mobile-brand-title">QuickChat</span>
+          </div>
+          <h2 class="desktop-view-title">Student Profile</h2>
+        </div>
+
+        <div class="topbar-right">
+          <button class="btn-primary desktop-edit-btn" id="btn-edit-desktop">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+            </svg>
+            <span>Edit Profile</span>
+          </button>
+          <button class="icon-button" id="btn-settings-top" aria-label="Settings">
+            <img src="assets/settings.svg" alt="Settings" class="svg-icon">
+          </button>
+        </div>
+      </header>
+
+      <!-- Profile Workspace Grid (Dynamically rendered from state) -->
+      <div class="profile-scroll-container">
+        <div class="profile-layout-grid">
+          
+          <!-- Column 1: Identity & Hero Card -->
+          <section class="identity-column">
+            <div class="profile-hero-card">
+              <div class="avatar-container">
+                <img src="assets/avatar.jpg" alt="Student Profile Picture" class="avatar-img" id="user-avatar">
+                <label for="avatar-input" class="avatar-edit-badge" title="Change photo">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                </label>
+                <input type="file" id="avatar-input" accept="image/*" class="sr-only">
+              </div>
+
+              <!-- Name, Pronouns & Username -->
+              <div class="user-identity">
+                <div class="name-pronouns-row">
+                  <h1 class="user-display-name" id="display-name">Maya Patel</h1>
+                  <span class="pronoun-badge" id="display-pronouns">she / her</span>
+                </div>
+                <div class="username-tag" id="display-username">@maya_sheridan</div>
+              </div>
+
+              <!-- Mobile Edit Action Buttons -->
+              <div class="hero-action-row">
+                <button class="btn-primary" id="btn-edit-mobile">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                  </svg>
+                  <span>Edit Profile</span>
+                </button>
+                <button class="btn-secondary" id="btn-share-profile" aria-label="Share Profile" title="Share Profile">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Bio / Quick Note Card -->
+            <div class="surface-card bio-card">
+              <div class="card-header-row">
+                <h3 class="card-title">About & Hackathon Focus</h3>
+                <span class="status-indicator-live">
+                  <span class="pulse-dot"></span> Active Now
+                </span>
+              </div>
+              <p class="bio-text" id="display-bio">
+                Designing playful, accessible interfaces for student collaboration. Currently building prototypes for the Nova Design Hackathon! 🚀
+              </p>
+              <div class="interest-tags" id="display-tags">
+                <!-- Dynamically generated tags -->
+              </div>
+            </div>
+          </section>
+
+          <!-- Column 2: Academic & Campus Credentials -->
+          <section class="credentials-column">
+            <div class="section-heading-bar">
+              <span class="section-badge">Campus & Academics</span>
+              <span class="academic-year-pill" id="display-year">Year 3 • Class of 2027</span>
+            </div>
+
+            <div class="credentials-grid">
+              <!-- Campus -->
+              <div class="surface-card credential-item">
+                <div class="card-icon-bubble bubble-cyan">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21h18M5 21V7l7-4 7 4v14M10 9h4M10 13h4M10 17h4"/>
+                  </svg>
+                </div>
+                <div class="credential-meta">
+                  <span class="meta-label">Campus</span>
+                  <strong class="meta-value" id="display-campus">Trafalgar Campus (Oakville)</strong>
+                </div>
+              </div>
+
+              <!-- Faculty -->
+              <div class="surface-card credential-item">
+                <div class="card-icon-bubble bubble-magenta">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <div class="credential-meta">
+                  <span class="meta-label">Faculty</span>
+                  <strong class="meta-value" id="display-faculty">Faculty of Animation, Arts & Design (FAAD)</strong>
+                </div>
+              </div>
+
+              <!-- Program -->
+              <div class="surface-card credential-item">
+                <div class="card-icon-bubble bubble-lime">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  </svg>
+                </div>
+                <div class="credential-meta">
+                  <span class="meta-label">Program</span>
+                  <strong class="meta-value" id="display-program">Honours Bachelor of Interaction Design (IXD)</strong>
+                </div>
+              </div>
+
+              <!-- Quick Stats Card -->
+              <div class="surface-card credential-item stats-item">
+                <div class="card-icon-bubble bubble-blue">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
+                <div class="credential-meta">
+                  <span class="meta-label">Campus Network</span>
+                  <strong class="meta-value" id="display-stats">128 Student Connections • 4 Active Study Groups</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Navigation Dock (Visible on Mobile Only) -->
+      <footer class="mobile-bottom-dock" aria-label="Mobile navigation">
+        <button class="dock-tab" id="dock-chat">
+          <img src="assets/chat.svg" alt="Chat" class="dock-icon">
+          <span>Chats</span>
+        </button>
+        <button class="dock-tab active" id="dock-profile">
+          <img src="assets/person.png" alt="Profile" class="dock-icon-img">
+          <span>Profile</span>
+        </button>
+        <button class="dock-tab" id="dock-settings">
+          <img src="assets/settings.svg" alt="Settings" class="dock-icon">
+          <span>Settings</span>
+        </button>
+      </footer>
+
+      <!-- Interactive Edit Modal Drawer (Responsive for Mobile & Desktop) -->
+      <div class="modal-backdrop" id="modal-backdrop" aria-hidden="true">
+        <div class="edit-modal-sheet" id="edit-drawer" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+          <div class="modal-header">
+            <h3 id="modal-title">Edit Profile Information</h3>
+            <button class="modal-close-btn" id="btn-close-drawer" aria-label="Close dialog">✕</button>
+          </div>
+          <form id="profile-form" class="edit-form">
+            <div class="form-group">
+              <label for="input-name">Full Name</label>
+              <input type="text" id="input-name" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="input-pronouns">Pronouns</label>
+                <input type="text" id="input-pronouns" placeholder="e.g. they/them, she/her">
+              </div>
+              <div class="form-group flex-1">
+                <label for="input-username">Username Handle</label>
+                <input type="text" id="input-username" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="input-campus">Campus Location</label>
+              <input type="text" id="input-campus" list="campus-options" required>
+              <datalist id="campus-options">
+                <option value="Trafalgar Campus (Oakville)">
+                <option value="Davis Campus (Brampton)">
+                <option value="Hazel McCallion Campus (Mississauga)">
+              </datalist>
+            </div>
+
+            <div class="form-group">
+              <label for="input-faculty">Faculty</label>
+              <input type="text" id="input-faculty" required>
+            </div>
+
+            <div class="form-group">
+              <label for="input-program">Academic Program</label>
+              <input type="text" id="input-program" required>
+            </div>
+
+            <div class="form-group">
+              <label for="input-year">Academic Year / Cohort</label>
+              <input type="text" id="input-year" placeholder="e.g. Year 3 • Class of 2027">
+            </div>
+
+            <div class="form-group">
+              <label for="input-bio">About / Hackathon Bio</label>
+              <textarea id="input-bio" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="input-tags">Focus Tags (comma-separated)</label>
+              <input type="text" id="input-tags" placeholder="e.g. UI/UX Design, Design Systems, NovaHacks">
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" id="btn-cancel-edit">Cancel</button>
+              <button type="submit" class="btn-primary btn-save">Save Profile</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

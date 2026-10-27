@@ -1,0 +1,1007 @@
+/* ==========================================================================
+   NovaHacks QuickChat - Responsive Design System
+   Exact tokens extracted from Figma Style Tile (3:18) & iPhone Screens
+   ========================================================================== */
+
+:root {
+  /* Figma Style Tile Color Tokens */
+  --figma-navy: #003767;          /* Rectangle 1: rgb(0, 55, 103) */
+  --figma-magenta: #cf2b74;       /* Rectangle 2: rgb(207, 43, 116) */
+  --figma-cyan-dark: #009ebd;     /* Rectangle 3: rgb(0, 159, 189) */
+  --figma-cyan-light: #1bb3cc;    /* Rectangle 4: rgb(27, 179, 204) */
+  --figma-lime: #c7db31;          /* Rectangle 5: rgb(199, 219, 49) */
+  --figma-offwhite: #f7f7f7;      /* Rectangle 6: rgb(247, 247, 247) */
+  --figma-teal: #02b3ce;          /* Rectangle 7: rgb(2, 179, 206) */
+  --figma-slate: #747682;         /* Rectangle 8: rgb(116, 118, 130) */
+  --figma-dark-slate: #414a52;    /* Rectangle 9: rgb(65, 74, 82) */
+  --figma-bg-deep: #070d1e;
+
+  /* Surfaces & Glass Tokens */
+  --surface-app: #f4f7fb;
+  --surface-card: rgba(255, 255, 255, 0.92);
+  --surface-glass: rgba(255, 255, 255, 0.72);
+  --border-card: rgba(0, 55, 103, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.35);
+
+  /* Typography Families from Style Tile */
+  --font-display: 'Merriweather', Georgia, serif;
+  --font-heading: 'Bricolage Grotesque', -apple-system, sans-serif;
+  --font-body: 'Outfit', -apple-system, sans-serif;
+
+  /* Elevation Shadows */
+  --shadow-sm: 0 4px 12px rgba(0, 55, 103, 0.05);
+  --shadow-md: 0 8px 24px rgba(0, 55, 103, 0.09);
+  --shadow-lg: 0 16px 40px rgba(0, 55, 103, 0.15);
+  --shadow-modal: 0 24px 60px rgba(0, 20, 50, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+  min-height: 100%;
+  font-family: var(--font-body);
+  color: var(--figma-dark-slate);
+  background-color: var(--figma-bg-deep);
+}
+
+/* ==========================================================================
+   Outer Layout Container (Adapts fluidly to full window on any device)
+   ========================================================================== */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 20%, #060b18 0%, #002547 50%, #0a1127 100%);
+}
+
+.app-layout {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  background: var(--surface-app);
+  position: relative;
+}
+
+/* ==========================================================================
+   Sidebar Navigation (Desktop & Tablet)
+   ========================================================================== */
+.desktop-sidebar {
+  display: none; /* hidden on mobile screens by default */
+  width: 260px;
+  background: #ffffff;
+  border-right: 1px solid rgba(0, 55, 103, 0.08);
+  padding: 28px 20px;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+  z-index: 20;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(0, 55, 103, 0.06);
+}
+
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.brand-text {
+  font-family: var(--font-heading);
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--figma-navy);
+  letter-spacing: -0.5px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 24px;
+  flex: 1;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: none;
+  background: transparent;
+  color: var(--figma-slate);
+  font-family: var(--font-heading);
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-align: left;
+}
+
+.sidebar-item:hover {
+  background: rgba(0, 55, 103, 0.04);
+  color: var(--figma-navy);
+}
+
+.sidebar-item.active {
+  background: linear-gradient(135deg, rgba(0, 55, 103, 0.08), rgba(207, 43, 116, 0.08));
+  color: var(--figma-magenta);
+}
+
+.sidebar-icon {
+  width: 22px;
+  height: 22px;
+  opacity: 0.75;
+}
+
+.sidebar-icon-img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.sidebar-item.active .sidebar-icon,
+.sidebar-item.active .sidebar-icon-img {
+  opacity: 1;
+  filter: drop-shadow(0 2px 4px rgba(207, 43, 116, 0.3));
+}
+
+.sidebar-footer {
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 55, 103, 0.06);
+}
+
+.event-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--figma-navy);
+  background: rgba(27, 179, 204, 0.12);
+  padding: 6px 12px;
+  border-radius: 20px;
+}
+
+/* ==========================================================================
+   Main Viewport
+   ========================================================================== */
+.main-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--surface-app);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Mobile-only status bar */
+.mobile-status-bar {
+  display: none; /* Shown on small screens */
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1a2233;
+}
+
+.notch-pill {
+  width: 90px;
+  height: 22px;
+  background: #000;
+  border-radius: 16px;
+}
+
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.battery-icon {
+  width: 20px;
+  height: 10px;
+  border: 1.5px solid #1a2233;
+  border-radius: 3px;
+  padding: 1px;
+  position: relative;
+}
+
+.battery-icon::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: 1.5px;
+  width: 2px;
+  height: 4px;
+  background: #1a2233;
+  border-radius: 0 1px 1px 0;
+}
+
+.battery-level {
+  display: block;
+  width: 80%;
+  height: 100%;
+  background: #1a2233;
+  border-radius: 1px;
+}
+
+/* App Top Navigation Bar */
+.app-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 55, 103, 0.06);
+  z-index: 10;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 55, 103, 0.08);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--figma-navy);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.icon-button:hover {
+  transform: scale(1.05);
+  background: #f7faff;
+}
+
+.mobile-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.mobile-brand-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--figma-navy);
+}
+
+.desktop-view-title {
+  display: none;
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--figma-navy);
+  letter-spacing: -0.3px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.desktop-edit-btn {
+  display: none; /* Shown on desktop/tablet */
+}
+
+.svg-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ==========================================================================
+   Scrollable Profile Workspace & Adaptive Responsive Grid
+   ========================================================================== */
+.profile-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px 20px 96px; /* bottom padding for mobile dock */
+  display: flex;
+  justify-content: center;
+}
+
+.profile-layout-grid {
+  width: 100%;
+  max-width: 1040px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.identity-column,
+.credentials-column {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Hero Profile Card (Figma Gradient & Avatar)
+   ========================================================================== */
+.profile-hero-card {
+  position: relative;
+  border-radius: 28px;
+  padding: 30px 24px;
+  background: linear-gradient(135deg, rgba(0, 55, 103, 0.96) 0%, rgba(207, 43, 116, 0.90) 100%);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.profile-hero-card::after {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, var(--figma-cyan-light) 0%, transparent 70%);
+  opacity: 0.5;
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.avatar-container {
+  position: relative;
+  width: 114px;
+  height: 114px;
+  margin-bottom: 16px;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+  transition: transform 0.25s ease;
+}
+
+.avatar-img:hover {
+  transform: scale(1.02);
+}
+
+.avatar-edit-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: var(--figma-cyan-light);
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 2.5px solid #fff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.avatar-edit-badge:hover {
+  transform: scale(1.15);
+  background: var(--figma-magenta);
+}
+
+.user-identity {
+  margin-bottom: 16px;
+  z-index: 1;
+}
+
+.name-pronouns-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.user-display-name {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.pronoun-badge {
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  padding: 3.5px 9px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.6px;
+}
+
+.username-tag {
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 500;
+  margin-top: 5px;
+  font-family: var(--font-heading);
+}
+
+.hero-action-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 280px;
+  z-index: 1;
+}
+
+.btn-primary {
+  flex: 1;
+  background: #ffffff;
+  color: var(--figma-navy);
+  border: none;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 11px 18px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1.5px);
+  background: #f0f7ff;
+}
+
+.btn-secondary {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1.5px);
+}
+
+/* ==========================================================================
+   Surface Cards & Credentials
+   ========================================================================== */
+.surface-card {
+  background: var(--surface-card);
+  border-radius: 22px;
+  padding: 18px 20px;
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.surface-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.card-title {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--figma-navy);
+}
+
+.status-indicator-live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #0d8349;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.bio-text {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--figma-dark-slate);
+}
+
+.interest-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.tag {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--figma-navy);
+  background: rgba(27, 179, 204, 0.12);
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+/* Credentials Column */
+.section-heading-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-badge {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--figma-navy);
+  background: rgba(0, 55, 103, 0.08);
+  padding: 5px 14px;
+  border-radius: 16px;
+}
+
+.academic-year-pill {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--figma-slate);
+}
+
+.credentials-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.credential-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.card-icon-bubble {
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bubble-cyan {
+  background: rgba(27, 179, 204, 0.14);
+  color: var(--figma-cyan-dark);
+}
+
+.bubble-magenta {
+  background: rgba(207, 43, 116, 0.14);
+  color: var(--figma-magenta);
+}
+
+.bubble-lime {
+  background: rgba(199, 219, 49, 0.22);
+  color: #5c6902;
+}
+
+.bubble-blue {
+  background: rgba(0, 55, 103, 0.12);
+  color: var(--figma-navy);
+}
+
+.credential-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.meta-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--figma-slate);
+  letter-spacing: 0.6px;
+}
+
+.meta-value {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #1a2233;
+  line-height: 1.35;
+}
+
+/* ==========================================================================
+   Mobile Bottom Navigation Dock
+   ========================================================================== */
+.mobile-bottom-dock {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(0, 55, 103, 0.08);
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 16px 8px;
+  z-index: 30;
+}
+
+.dock-tab {
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--figma-slate);
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 600;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.dock-tab.active {
+  color: var(--figma-magenta);
+}
+
+.dock-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.dock-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(207, 43, 116, 0.3));
+}
+
+/* ==========================================================================
+   Interactive Edit Modal / Sheet
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 13, 30, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s ease;
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.edit-modal-sheet {
+  width: 100%;
+  max-width: 540px;
+  background: #ffffff;
+  border-radius: 28px 28px 0 0;
+  padding: 24px 24px 36px;
+  box-shadow: var(--shadow-modal);
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-backdrop.open .edit-modal-sheet {
+  transform: translateY(0%);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  font-family: var(--font-heading);
+  font-size: 19px;
+  font-weight: 800;
+  color: var(--figma-navy);
+}
+
+.modal-close-btn {
+  background: #f1f4f8;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--figma-slate);
+  transition: background 0.15s ease;
+}
+
+.modal-close-btn:hover {
+  background: #e2e8f0;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--figma-slate);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #dbe2ea;
+  outline: none;
+  background: #f8fafc;
+  color: #1a2233;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--figma-cyan-dark);
+  background: #ffffff;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-cancel {
+  flex: 1;
+  background: #f1f4f8;
+  color: var(--figma-dark-slate);
+  border: none;
+  padding: 12px;
+  border-radius: 14px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-save {
+  flex: 2;
+  background: linear-gradient(135deg, var(--figma-navy), var(--figma-magenta));
+  color: #ffffff;
+  padding: 12px;
+  font-size: 14.5px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints: Tablet (768px+) & Desktop (1024px+)
+   ========================================================================== */
+
+/* Small Phones (< 480px) */
+@media (max-width: 480px) {
+  .mobile-status-bar {
+    display: flex;
+  }
+  .profile-scroll-container {
+    padding: 16px 14px 96px;
+  }
+}
+
+/* Tablet & Desktop (768px and wider) */
+@media (min-width: 768px) {
+  body {
+    padding: 0;
+  }
+
+  .mobile-bottom-dock {
+    display: none; /* Hide bottom dock; sidebar handles navigation */
+  }
+
+  .desktop-sidebar {
+    display: flex; /* Activate persistent sidebar */
+  }
+
+  .mobile-brand {
+    display: none; /* Desktop sidebar already shows brand */
+  }
+
+  .desktop-view-title {
+    display: block;
+  }
+
+  .desktop-edit-btn {
+    display: flex;
+    background: linear-gradient(135deg, var(--figma-navy), var(--figma-magenta));
+    color: #fff;
+  }
+
+  .hero-action-row #btn-edit-mobile {
+    display: none; /* On desktop, use the top bar Edit button */
+  }
+
+  .hero-action-row {
+    max-width: 140px;
+  }
+
+  .profile-scroll-container {
+    padding: 36px 40px 60px;
+  }
+
+  /* Two-column layout */
+  .profile-layout-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  .credentials-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .credentials-grid .stats-item {
+    grid-column: span 2;
+  }
+
+  /* Modal becomes centered dialog on larger screens */
+  .modal-backdrop {
+    align-items: center;
+  }
+
+  .edit-modal-sheet {
+    border-radius: 28px;
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+    transition: transform 0.22s ease, opacity 0.22s ease;
+  }
+
+  .modal-backdrop.open .edit-modal-sheet {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Ultra-wide / Large Desktop (1200px+) */
+@media (min-width: 1200px) {
+  .desktop-sidebar {
+    width: 280px;
+  }
+
+  .profile-layout-grid {
+    grid-template-columns: 390px 1fr;
+    gap: 36px;
+  }
+
+  .profile-hero-card {
+    padding: 38px 28px;
+  }
+
+  .avatar-container {
+    width: 128px;
+    height: 128px;
+  }
+
+  .user-display-name {
+    font-size: 28px;
+  }
+}
