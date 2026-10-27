@@ -314,6 +314,10 @@
     if (btnTopGenerateQr) btnTopGenerateQr.style.display = 'none';
     if (btnEditDesktop) btnEditDesktop.style.display = 'none';
 
+    if (viewName !== 'room') {
+      stopLiveSync();
+    }
+
     // Reset active nav items
     const allNavButtons = document.querySelectorAll('.dock-tab, .sidebar-item');
     allNavButtons.forEach(b => b.classList.remove('active'));
@@ -411,6 +415,8 @@
     updateRoomTTLCountdown(room.expiresAt);
     renderMessageStream(room.messages);
     switchView('room');
+
+    startLiveSync(roomId);
 
     setTimeout(() => {
       document.getElementById('chat-input')?.focus();
@@ -519,11 +525,21 @@
 
     renderMessageStream(room.messages);
 
+    // Sync via broadcastChannel for same-browser tabs
     broadcastMessage({
       type: 'NEW_MESSAGE',
       roomId: room.roomId,
       message: newMessage
     });
+
+    // Sync via lightweight server for cross-device phones/laptops
+    try {
+      fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomId: room.roomId, message: newMessage })
+      }).catch(() => {});
+    } catch (e) {}
   }
 
   // --------------------------------------------------------------------------
@@ -603,24 +619,133 @@
   }
 
   // --------------------------------------------------------------------------
-  // 7. QR Modal Controller
+  // 7. QR Modal Controller & Network Resolver
   // --------------------------------------------------------------------------
+  let detectedLanIp = '10.16.208.227';
+  let qrTargetMode = 'network'; // 'network' (for phones) or 'localhost' (for same machine)
+  let activeQRRoomId = null;
+  let liveSyncTimer = null;
+
+  // Auto-fetch LAN IP from ip.json or /api/ip
+  function refreshDetectedLanIp() {
+    fetch('/ip.json')
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.ip) {
+          detectedLanIp = data.ip;
+          if (activeQRRoomId) {
+            const room = getRoomById(activeQRRoomId);
+            if (room) renderQRContent(room);
+          }
+        }
+      })
+      .catch(() => {
+        fetch('/api/ip')
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.ip) {
+              detectedLanIp = data.ip;
+              if (activeQRRoomId) {
+                const room = getRoomById(activeQRRoomId);
+                if (room) renderQRContent(room);
+              }
+            }
+          })
+          .catch(() => {});
+      });
+  }
+  refreshDetectedLanIp();
+
+  function getEffectiveOrigin() {
+    const customHost = localStorage.getItem('novahacks_custom_host');
+    if (customHost) {
+      return customHost.startsWith('http://') || customHost.startsWith('https://')
+        ? customHost.replace(/\/+$/, '')
+        : `http://${customHost.replace(/\/+$/, '')}`;
+    }
+
+    if (qrTargetMode === 'network') {
+      const isLoopback = window.location.hostname === 'localhost' ||
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.protocol === 'file:';
+      const port = window.location.port || '3000';
+      if (isLoopback) {
+        return `http://${detectedLanIp}:${port}`;
+      }
+      return window.location.origin;
+    } else {
+      // Localhost mode
+      if (window.location.protocol === 'file:') {
+        return 'http://localhost:3000';
+      }
+      return window.location.origin;
+    }
+  }
+
+  function renderQRContent(room) {
+    const urlInput = document.getElementById('qr-room-url-input');
+    const networkAlert = document.getElementById('qr-network-alert');
+    const statusText = document.getElementById('qr-network-status-text');
+    const hintText = document.getElementById('qr-network-hint');
+    const detectedIpLabel = document.getElementById('qr-detected-ip-label');
+    const tabNetwork = document.getElementById('qr-tab-network');
+    const tabLocalhost = document.getElementById('qr-tab-localhost');
+
+    const origin = getEffectiveOrigin();
+    const queryParams = new URLSearchParams({
+      room: room.roomId,
+      topic: room.courseTopic || 'BUSM 1872',
+      host: room.hostName || 'Maya Patel',
+      expires: room.expiresAt || (Date.now() + 24 * 3600000)
+    });
+
+    const isFile = window.location.protocol === 'file:';
+    const basePath = isFile ? '/' : window.location.pathname;
+    const cleanPath = basePath.endsWith('.html') || basePath === '/' ? basePath : `${basePath}/`;
+    const shareUrl = `${origin}${cleanPath}?${queryParams.toString()}`;
+
+    if (urlInput) urlInput.value = shareUrl;
+
+    if (qrTargetMode === 'network') {
+      tabNetwork?.classList.add('active');
+      tabLocalhost?.classList.remove('active');
+      networkAlert?.classList.remove('alert-warning');
+      if (detectedIpLabel) detectedIpLabel.textContent = origin;
+      if (statusText) statusText.innerHTML = `Network URL: <strong>${origin}</strong>`;
+      if (hintText) hintText.textContent = `Phones on the same Wi-Fi / hotspot can scan and join instantly.`;
+    } else {
+      tabLocalhost?.classList.add('active');
+      tabNetwork?.classList.remove('active');
+      networkAlert?.classList.add('alert-warning');
+      if (statusText) statusText.innerHTML = `⚠️ Localhost Mode: <strong>${origin}</strong>`;
+      if (hintText) hintText.textContent = `Only works on this computer. Switch to "Phone / Other Devices" to scan with a phone!`;
+    }
+
+    generateQRCode('qr-code-element', shareUrl);
+  }
+
   function showQRModal(roomId) {
     const room = getRoomById(roomId);
     if (!room) return;
+    activeQRRoomId = roomId;
 
     const modal = document.getElementById('qr-modal-backdrop');
     const codeDisplay = document.getElementById('qr-room-code-display');
-    const urlInput = document.getElementById('qr-room-url-input');
     const topicBadge = document.getElementById('qr-topic-badge');
 
-    const shareUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
-
     if (codeDisplay) codeDisplay.textContent = roomId;
-    if (urlInput) urlInput.value = shareUrl;
     if (topicBadge) topicBadge.textContent = room.courseTopic || 'BUSM 1872';
 
-    generateQRCode('qr-code-element', shareUrl);
+    // Register room with sync server if running
+    try {
+      fetch('/api/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ room: room })
+      }).catch(() => {});
+    } catch (e) {}
+
+    renderQRContent(room);
 
     modal?.classList.add('open');
     modal?.setAttribute('aria-hidden', 'false');
@@ -631,6 +756,49 @@
         modal?.classList.remove('open');
         openChatRoom(roomId, false);
       };
+    }
+  }
+
+  // Cross-device live sync polling
+  function startLiveSync(roomId) {
+    if (liveSyncTimer) clearInterval(liveSyncTimer);
+    liveSyncTimer = setInterval(() => {
+      if (currentActiveRoomId !== roomId) {
+        clearInterval(liveSyncTimer);
+        return;
+      }
+      const room = getRoomById(roomId);
+      if (!room) return;
+      const lastTime = room.messages.length > 0
+        ? (room.messages[room.messages.length - 1].timestamp || 0)
+        : 0;
+
+      fetch(`/api/sync?roomId=${encodeURIComponent(roomId)}&since=${lastTime}`)
+        .then(r => (r.ok ? r.json() : null))
+        .then(data => {
+          if (data && Array.isArray(data.messages) && data.messages.length > 0) {
+            let changed = false;
+            data.messages.forEach(msg => {
+              if (!room.messages.some(m => m.id === msg.id)) {
+                room.messages.push(msg);
+                changed = true;
+              }
+            });
+            if (changed) {
+              const rooms = getAllRooms().map(r => (r.roomId === room.roomId ? room : r));
+              saveAllRooms(rooms);
+              renderMessageStream(room.messages);
+            }
+          }
+        })
+        .catch(() => {});
+    }, 1200);
+  }
+
+  function stopLiveSync() {
+    if (liveSyncTimer) {
+      clearInterval(liveSyncTimer);
+      liveSyncTimer = null;
     }
   }
 
@@ -857,6 +1025,53 @@
       }
     });
 
+    // QR Target Switcher Tabs
+    document.getElementById('qr-tab-network')?.addEventListener('click', () => {
+      qrTargetMode = 'network';
+      if (activeQRRoomId) {
+        const room = getRoomById(activeQRRoomId);
+        if (room) renderQRContent(room);
+      }
+    });
+
+    document.getElementById('qr-tab-localhost')?.addEventListener('click', () => {
+      qrTargetMode = 'localhost';
+      if (activeQRRoomId) {
+        const room = getRoomById(activeQRRoomId);
+        if (room) renderQRContent(room);
+      }
+    });
+
+    // Custom Host Drawer Controls
+    const customHostDrawer = document.getElementById('custom-host-drawer');
+    const inputCustomHost = document.getElementById('input-custom-host');
+    document.getElementById('btn-toggle-custom-host')?.addEventListener('click', () => {
+      customHostDrawer?.classList.toggle('hidden');
+      if (inputCustomHost && !inputCustomHost.value) {
+        inputCustomHost.value = localStorage.getItem('novahacks_custom_host') || `${detectedLanIp}:3000`;
+      }
+    });
+
+    document.getElementById('btn-apply-custom-host')?.addEventListener('click', () => {
+      const val = inputCustomHost?.value.trim();
+      if (val) {
+        localStorage.setItem('novahacks_custom_host', val);
+        if (activeQRRoomId) {
+          const room = getRoomById(activeQRRoomId);
+          if (room) renderQRContent(room);
+        }
+      }
+    });
+
+    document.getElementById('btn-reset-custom-host')?.addEventListener('click', () => {
+      localStorage.removeItem('novahacks_custom_host');
+      if (inputCustomHost) inputCustomHost.value = '';
+      if (activeQRRoomId) {
+        const room = getRoomById(activeQRRoomId);
+        if (room) renderQRContent(room);
+      }
+    });
+
     // Figma Frame 1 Action Bar: "Add Users", "Remove User", "Delete Chat" (20:53)
     document.getElementById('btn-room-add-users')?.addEventListener('click', () => {
       if (currentActiveRoomId) {
@@ -1047,7 +1262,41 @@
     const roomParam = urlParams.get('room');
 
     if (roomParam) {
-      const targetRoom = getRoomById(roomParam);
+      let targetRoom = getRoomById(roomParam);
+
+      // Dynamic Room Auto-Hydration for scanned guest devices
+      if (!targetRoom) {
+        const topic = urlParams.get('topic') || roomParam.split('-')[0] || 'BUSM 1872';
+        const host = urlParams.get('host') || 'Maya Patel';
+        const expires = parseInt(urlParams.get('expires')) || (Date.now() + 24 * 3600000);
+
+        targetRoom = {
+          roomId: roomParam,
+          courseTopic: topic,
+          hostName: host,
+          createdAt: Date.now(),
+          expiresAt: expires,
+          status: 'active',
+          unreadCount: 0,
+          participants: [
+            { id: 'p-host-initial', name: host, initial: (host || 'H').charAt(0).toUpperCase(), color: 'circle-color-navy', isHost: true }
+          ],
+          messages: [
+            {
+              id: `sys-${Date.now()}`,
+              sender: 'QuickChat System',
+              senderInitial: 'Q',
+              isSystem: true,
+              text: `⚡ Room ${roomParam} connected for [${topic}]. You joined as an anonymous guest! Auto-deletes in 24 hours.`,
+              timestamp: Date.now()
+            }
+          ]
+        };
+        const allRooms = getAllRooms();
+        allRooms.unshift(targetRoom);
+        saveAllRooms(allRooms);
+      }
+
       if (targetRoom) {
         const guestJoinModal = document.getElementById('guest-join-modal-backdrop');
         const guestHostName = document.getElementById('guest-host-name');

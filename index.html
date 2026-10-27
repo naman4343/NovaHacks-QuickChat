@@ -457,6 +457,7 @@
       </footer>
 
       <!-- MODAL 1: QR CODE SHARE & INVITE MODAL -->
+      <!-- MODAL 1: QR CODE PRESENTATION -->
       <div class="modal-backdrop" id="qr-modal-backdrop" aria-hidden="true">
         <div class="edit-modal-sheet qr-modal-card" role="dialog" aria-modal="true">
           <div class="modal-header">
@@ -468,6 +469,26 @@
           </div>
 
           <div class="qr-presentation-wrap">
+            <!-- Target Mode Switcher (Crucial for mobile phones scanning) -->
+            <div class="qr-target-tabs" role="tablist">
+              <button type="button" class="qr-tab-btn active" id="qr-tab-network" title="Uses local network IP so phones and other devices can access the webpage">
+                <span class="tab-icon">📱</span>
+                <span>Phone / Other Devices</span>
+              </button>
+              <button type="button" class="qr-tab-btn" id="qr-tab-localhost" title="Uses localhost for testing in other tabs on this machine">
+                <span class="tab-icon">💻</span>
+                <span>Localhost</span>
+              </button>
+            </div>
+
+            <div class="qr-network-alert" id="qr-network-alert">
+              <span class="alert-icon">📡</span>
+              <div class="alert-text">
+                <span id="qr-network-status-text">Network URL: <strong id="qr-detected-ip-label">http://10.16.208.227:3000</strong></span>
+                <small id="qr-network-hint">Phones on the same Wi-Fi / hotspot can scan and join instantly.</small>
+              </div>
+            </div>
+
             <div class="qr-code-box" id="qr-code-element">
               <!-- QRCode.js renders vector QR here -->
             </div>
@@ -484,8 +505,23 @@
               </button>
             </div>
 
+            <!-- Custom Host / Tunnel Toggle -->
+            <div class="qr-custom-host-row">
+              <button type="button" class="btn-link-subtle" id="btn-toggle-custom-host">⚙️ Change Network IP / Tunnel URL</button>
+              <div class="custom-host-drawer hidden" id="custom-host-drawer">
+                <div class="custom-host-input-group">
+                  <input type="text" id="input-custom-host" placeholder="e.g. 10.16.208.227:3000 or tunnel.loca.lt">
+                  <button type="button" class="btn-apply-host" id="btn-apply-custom-host">Set</button>
+                  <button type="button" class="btn-reset-host" id="btn-reset-custom-host" title="Reset to auto-detected IP">Reset</button>
+                </div>
+                <p class="custom-host-help">
+                  💡 Tip: If using campus Wi-Fi with client isolation, connect your laptop and phone to a personal hotspot or enter your tunnel URL here.
+                </p>
+              </div>
+            </div>
+
             <p class="qr-helper-text">
-              ✨ <strong>No account needed:</strong> Classmates and study partners scan this code to jump into the room as guest participants immediately.
+              ✨ <strong>No app or account needed:</strong> Classmates and study partners scan this code with their camera to jump into the room as guest participants immediately.
             </p>
 
             <div class="qr-countdown-notice">
