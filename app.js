@@ -295,7 +295,7 @@
   let activeFilterTab = 'active';
 
   function switchView(viewName) {
-    const viewOnboarding = document.getElementById('view-onboarding');
+    const viewLogin = document.getElementById('view-login') || document.getElementById('view-onboarding');
     const viewHome = document.getElementById('view-home');
     const viewRoom = document.getElementById('view-room');
     const viewProfile = document.getElementById('view-profile');
@@ -305,7 +305,7 @@
     const btnEditDesktop = document.getElementById('btn-edit-desktop');
 
     // Hide all views
-    if (viewOnboarding) viewOnboarding.style.display = 'none';
+    if (viewLogin) viewLogin.style.display = 'none';
     if (viewHome) viewHome.style.display = 'none';
     if (viewRoom) viewRoom.style.display = 'none';
     if (viewProfile) viewProfile.style.display = 'none';
@@ -318,9 +318,29 @@
     const allNavButtons = document.querySelectorAll('.dock-tab, .sidebar-item');
     allNavButtons.forEach(b => b.classList.remove('active'));
 
-    if (viewName === 'onboarding') {
-      if (viewOnboarding) viewOnboarding.style.display = 'flex';
-      if (pageTitle) pageTitle.textContent = 'Welcome to QuickChat';
+    if (viewName === 'login' || viewName === 'onboarding') {
+      if (viewLogin) viewLogin.style.display = 'flex';
+      if (pageTitle) pageTitle.textContent = 'Login to QuickChat';
+      document.getElementById('sidebar-login')?.classList.add('active');
+
+      // Populate input fields if profile exists
+      const nameInp = document.getElementById('login-input-name');
+      const pronounsInp = document.getElementById('login-input-pronouns');
+      const courseInp = document.getElementById('login-input-course');
+      const campusInp = document.getElementById('login-input-campus');
+
+      if (nameInp && !nameInp.value && currentProfile.fullName && !currentProfile.isGuest) {
+        nameInp.value = currentProfile.fullName;
+      }
+      if (pronounsInp && !pronounsInp.value && currentProfile.pronouns) {
+        pronounsInp.value = currentProfile.pronouns;
+      }
+      if (courseInp && !courseInp.value && currentProfile.course) {
+        courseInp.value = currentProfile.course;
+      }
+      if (campusInp && currentProfile.campus) {
+        campusInp.value = currentProfile.campus;
+      }
     } else if (viewName === 'home' || viewName === 'chats') {
       if (viewHome) viewHome.style.display = 'flex';
       if (pageTitle) pageTitle.textContent = 'QuickChat Hub';
@@ -736,6 +756,8 @@
     document.getElementById('sidebar-profile')?.addEventListener('click', () => switchView('profile'));
     document.getElementById('dock-profile')?.addEventListener('click', () => switchView('profile'));
 
+    document.getElementById('sidebar-login')?.addEventListener('click', () => switchView('login'));
+
     document.getElementById('brand-link')?.addEventListener('click', () => switchView('home'));
     document.getElementById('mobile-brand-link')?.addEventListener('click', () => switchView('home'));
 
@@ -749,7 +771,36 @@
 
     document.getElementById('btn-leave-room')?.addEventListener('click', () => switchView('home'));
 
-    // Onboarding Form & Skip Handler (Figma 16:83)
+    // Figma Login Page Handlers (Figma 16:83)
+    document.getElementById('btn-login-skip')?.addEventListener('click', () => {
+      currentProfile.isGuest = true;
+      if (!currentProfile.fullName || currentProfile.fullName.startsWith('Guest')) {
+        currentProfile.fullName = `Guest #${Math.floor(100 + Math.random() * 900)}`;
+      }
+      saveProfileData(currentProfile);
+      renderProfile(currentProfile);
+      switchView('home');
+    });
+
+    document.getElementById('login-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('login-input-name')?.value.trim();
+      const pronouns = document.getElementById('login-input-pronouns')?.value.trim();
+      const course = document.getElementById('login-input-course')?.value.trim();
+      const campus = document.getElementById('login-input-campus')?.value;
+
+      if (name) currentProfile.fullName = name;
+      if (pronouns) currentProfile.pronouns = pronouns;
+      if (course) currentProfile.course = course;
+      if (campus) currentProfile.campus = campus;
+      currentProfile.isGuest = false;
+
+      saveProfileData(currentProfile);
+      renderProfile(currentProfile);
+      switchView('home');
+    });
+
+    // Legacy Onboarding Handlers (Fallback)
     document.getElementById('btn-skip-onboarding')?.addEventListener('click', () => {
       currentProfile.isGuest = true;
       currentProfile.fullName = `Guest #${Math.floor(100 + Math.random() * 900)}`;
@@ -1051,10 +1102,10 @@
         switchView('home');
       }
     } else {
-      // If user hasn't visited before, show onboarding view (with Skip option)
+      // If user hasn't visited before, show Figma Login view (with Skip option)
       const hasOnboarded = localStorage.getItem(ONBOARDED_KEY);
       if (!hasOnboarded) {
-        switchView('onboarding');
+        switchView('login');
       } else {
         switchView('home');
       }

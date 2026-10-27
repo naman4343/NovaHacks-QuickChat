@@ -36,6 +36,12 @@
           <img src="assets/person.png" alt="Profile" class="sidebar-icon-img">
           <span>My Profile</span>
         </button>
+        <button class="sidebar-item" id="sidebar-login">
+          <svg class="sidebar-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          <span>Login / Setup</span>
+        </button>
         <button class="sidebar-item" id="sidebar-settings">
           <img src="assets/settings.svg" alt="Settings" class="sidebar-icon">
           <span>Settings</span>
@@ -105,55 +111,63 @@
         </div>
       </header>
 
-      <!-- VIEW 1: ONBOARDING / LOGIN SCREEN WITH SKIP (Figma 16:83) -->
-      <section class="view-panel" id="view-onboarding" style="display: none;">
-        <div class="onboarding-screen-wrap">
-          <div class="onboarding-top-bar">
-            <div class="onboarding-brand">
-              <img src="assets/logo.png" alt="QuickChat Logo" class="onboarding-logo-img">
-              <span>QuickChat</span>
-            </div>
-            <!-- Skip button from Figma 16:83 -->
-            <button class="btn-skip-onboarding" id="btn-skip-onboarding">Skip</button>
+      <!-- VIEW 1: FIGMA LOGIN PAGE (Figma 16:83) -->
+      <section class="view-panel" id="view-login" style="display: none;">
+        <div class="figma-login-container">
+          
+          <!-- Top Center 133x133 Logo Box (Rectangle 10 in Figma 16:83) -->
+          <div class="figma-login-logo-badge">
+            <img src="assets/logo.png" alt="QuickChat Logo" class="login-badge-img">
+            <span class="login-badge-text">QuickChat</span>
           </div>
 
-          <div class="onboarding-form-card">
-            <div class="onboarding-header">
-              <h2>Student Setup</h2>
-              <p>Create your student identity for campus collaboration, or skip to start chatting right away as a guest.</p>
+          <!-- Login Form Card (Rectangles 6, 7, 8, 9 in Figma 16:83) -->
+          <form id="login-form" class="figma-login-form">
+            
+            <!-- Field 1: Name -->
+            <div class="figma-input-wrapper">
+              <label for="login-input-name" class="figma-input-label">Name</label>
+              <input type="text" id="login-input-name" class="figma-input-field" placeholder="Enter your full name" required>
             </div>
 
-            <form id="onboarding-form" class="edit-form">
-              <div class="form-group">
-                <label for="onboard-name">Name</label>
-                <input type="text" id="onboard-name" placeholder="e.g. Maya Patel" required>
-              </div>
+            <!-- Field 2: Pronouns -->
+            <div class="figma-input-wrapper">
+              <label for="login-input-pronouns" class="figma-input-label">Pronouns</label>
+              <input type="text" id="login-input-pronouns" class="figma-input-field" placeholder="e.g. she / her, they / them">
+            </div>
 
-              <div class="form-row">
-                <div class="form-group flex-1">
-                  <label for="onboard-pronouns">Pronouns</label>
-                  <input type="text" id="onboard-pronouns" placeholder="e.g. she / her, they / them">
-                </div>
-                <div class="form-group flex-1">
-                  <label for="onboard-course">Course / Major</label>
-                  <input type="text" id="onboard-course" placeholder="e.g. BUSM 1872, IXD" required>
-                </div>
-              </div>
+            <!-- Field 3: Course -->
+            <div class="figma-input-wrapper">
+              <label for="login-input-course" class="figma-input-label">Course</label>
+              <input type="text" id="login-input-course" class="figma-input-field" placeholder="e.g. BUSM 1872, IXD" required>
+            </div>
 
-              <div class="form-group">
-                <label for="onboard-campus">Campus</label>
-                <select id="onboard-campus">
-                  <option value="Trafalgar Campus (Oakville)" selected>Trafalgar Campus (Oakville)</option>
-                  <option value="Davis Campus (Brampton)">Davis Campus (Brampton)</option>
-                  <option value="Hazel McCallion Campus (Mississauga)">Hazel McCallion Campus (Mississauga)</option>
-                </select>
-              </div>
+            <!-- Field 4: Campus -->
+            <div class="figma-input-wrapper">
+              <label for="login-input-campus" class="figma-input-label">Campus</label>
+              <select id="login-input-campus" class="figma-input-field">
+                <option value="Trafalgar Campus (Oakville)" selected>Trafalgar Campus (Oakville)</option>
+                <option value="Davis Campus (Brampton)">Davis Campus (Brampton)</option>
+                <option value="Hazel McCallion Campus (Mississauga)">Hazel McCallion Campus (Mississauga)</option>
+              </select>
+            </div>
 
-              <button type="submit" class="btn-primary btn-block btn-lg" id="btn-onboard-submit">
-                <span>Submit & Enter</span>
+            <!-- Side-by-side Submit & Skip Buttons (Rectangles 11 & 12 in Figma 16:83) -->
+            <div class="figma-login-actions-row">
+              <button type="submit" class="figma-btn-submit" id="btn-login-submit">
+                <span>Submit</span>
               </button>
-            </form>
-          </div>
+              <button type="button" class="figma-btn-skip" id="btn-login-skip">
+                <span>Skip</span>
+              </button>
+            </div>
+
+            <p class="figma-login-caption">
+              ⚡ Tap <strong>Skip</strong> to browse & chat immediately as an anonymous student guest.
+            </p>
+
+          </form>
+
         </div>
       </section>
 
