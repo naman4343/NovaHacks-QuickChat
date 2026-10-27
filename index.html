@@ -3,30 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>QuickChat - Student Profile | NovaHacks</title>
-  <meta name="description" content="QuickChat Student Profile for Nova Design Hackathon - responsive across desktop, tablet, and mobile.">
+  <title>QuickChat - Barrier-Free Campus & Event Chats | NovaHacks</title>
+  <meta name="description" content="QuickChat: Impromptu student chat rooms via QR codes, course topic tags, and accessible profiles for Nova Design Hackathon.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;400;600;700;800&family=Merriweather:wght@400;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Desktop / Global App Wrapper -->
   <div class="app-layout">
     
-    <!-- Sidebar Navigation (Active on Desktop & Tablet) -->
+    <!-- Sidebar Navigation (Desktop & Tablet) -->
     <aside class="desktop-sidebar" aria-label="Sidebar navigation">
-      <div class="sidebar-brand">
+      <div class="sidebar-brand" id="brand-link" style="cursor: pointer;">
         <img src="assets/logo.png" alt="QuickChat Logo" class="brand-logo">
         <span class="brand-text">QuickChat</span>
       </div>
 
       <nav class="sidebar-nav">
+        <button class="sidebar-item active" id="sidebar-home">
+          <svg class="sidebar-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>Home</span>
+        </button>
         <button class="sidebar-item" id="sidebar-chats">
           <img src="assets/chat.svg" alt="Chats" class="sidebar-icon">
-          <span>Messages</span>
+          <span>QuickChats</span>
+          <span class="nav-count-badge" id="sidebar-chat-count" hidden>0</span>
         </button>
-        <button class="sidebar-item active" id="sidebar-profile">
+        <button class="sidebar-item" id="sidebar-profile">
           <img src="assets/person.png" alt="Profile" class="sidebar-icon-img">
           <span>My Profile</span>
         </button>
@@ -44,7 +50,7 @@
       </div>
     </aside>
 
-    <!-- Main Content Shell (Fluidly adapts across all viewport sizes) -->
+    <!-- Main Viewport Shell -->
     <main class="main-viewport" id="app-screen">
       
       <!-- Mobile-only simulated status bar -->
@@ -70,158 +76,363 @@
               <path d="M15 18l-6-6 6-6"/>
             </svg>
           </button>
-          <div class="mobile-brand">
+          <div class="mobile-brand" id="mobile-brand-link" style="cursor: pointer;">
             <img src="assets/logo.png" alt="QuickChat Logo" class="brand-icon">
             <span class="mobile-brand-title">QuickChat</span>
           </div>
-          <h2 class="desktop-view-title">Student Profile</h2>
+          <h2 class="desktop-view-title" id="page-title">Home</h2>
         </div>
 
         <div class="topbar-right">
-          <button class="btn-primary desktop-edit-btn" id="btn-edit-desktop">
+          <!-- Action buttons for various screens -->
+          <button class="btn-primary" id="btn-top-generate-qr">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+            <span>Generate QR</span>
+          </button>
+
+          <button class="btn-primary desktop-edit-btn" id="btn-edit-desktop" style="display: none;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
             </svg>
             <span>Edit Profile</span>
           </button>
+
           <button class="icon-button" id="btn-settings-top" aria-label="Settings">
             <img src="assets/settings.svg" alt="Settings" class="svg-icon">
           </button>
         </div>
       </header>
 
-      <!-- Profile Workspace Grid (Dynamically rendered from state) -->
-      <div class="profile-scroll-container">
-        <div class="profile-layout-grid">
+      <!-- VIEW 1: ONBOARDING / LOGIN SCREEN WITH SKIP (Figma 16:83) -->
+      <section class="view-panel" id="view-onboarding" style="display: none;">
+        <div class="onboarding-screen-wrap">
+          <div class="onboarding-top-bar">
+            <div class="onboarding-brand">
+              <img src="assets/logo.png" alt="QuickChat Logo" class="onboarding-logo-img">
+              <span>QuickChat</span>
+            </div>
+            <!-- Skip button from Figma 16:83 -->
+            <button class="btn-skip-onboarding" id="btn-skip-onboarding">Skip</button>
+          </div>
+
+          <div class="onboarding-form-card">
+            <div class="onboarding-header">
+              <h2>Student Setup</h2>
+              <p>Create your student identity for campus collaboration, or skip to start chatting right away as a guest.</p>
+            </div>
+
+            <form id="onboarding-form" class="edit-form">
+              <div class="form-group">
+                <label for="onboard-name">Name</label>
+                <input type="text" id="onboard-name" placeholder="e.g. Maya Patel" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="onboard-pronouns">Pronouns</label>
+                  <input type="text" id="onboard-pronouns" placeholder="e.g. she / her, they / them">
+                </div>
+                <div class="form-group flex-1">
+                  <label for="onboard-course">Course / Major</label>
+                  <input type="text" id="onboard-course" placeholder="e.g. BUSM 1872, IXD" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="onboard-campus">Campus</label>
+                <select id="onboard-campus">
+                  <option value="Trafalgar Campus (Oakville)" selected>Trafalgar Campus (Oakville)</option>
+                  <option value="Davis Campus (Brampton)">Davis Campus (Brampton)</option>
+                  <option value="Hazel McCallion Campus (Mississauga)">Hazel McCallion Campus (Mississauga)</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn-primary btn-block btn-lg" id="btn-onboard-submit">
+                <span>Submit & Enter</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: HOME DASHBOARD (Figma 16:74 & 30:593) -->
+      <section class="view-panel" id="view-home">
+        <div class="home-dashboard-container">
           
-          <!-- Column 1: Identity & Hero Card -->
-          <section class="identity-column">
-            <div class="profile-hero-card">
-              <div class="avatar-container">
-                <img src="assets/avatar.jpg" alt="Student Profile Picture" class="avatar-img" id="user-avatar">
-                <label for="avatar-input" class="avatar-edit-badge" title="Change photo">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                    <circle cx="12" cy="13" r="4"/>
+          <!-- Hero Card: "Generate a new chat!" / "Generate QR" -->
+          <div class="figma-hero-generate-card">
+            <div class="generate-card-left">
+              <span class="banner-pill">⚡ Barrier-Free Communication</span>
+              <h2>Generate a new chat!</h2>
+              <p>Spin up an ephemeral chat for group projects, speaking with professors, or campus interactions. Anyone scans your QR code to join without creating an account.</p>
+              
+              <div class="quick-course-input-row">
+                <input type="text" id="input-quick-course-tag" placeholder="Course or Topic (e.g. BUSM 1872, Study Group)" value="BUSM 1872">
+                <button class="btn-hero-launch" id="btn-home-generate-qr">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
                   </svg>
-                </label>
-                <input type="file" id="avatar-input" accept="image/*" class="sr-only">
-              </div>
-
-              <!-- Name, Pronouns & Username -->
-              <div class="user-identity">
-                <div class="name-pronouns-row">
-                  <h1 class="user-display-name" id="display-name">Maya Patel</h1>
-                  <span class="pronoun-badge" id="display-pronouns">she / her</span>
-                </div>
-                <div class="username-tag" id="display-username">@maya_sheridan</div>
-              </div>
-
-              <!-- Mobile Edit Action Buttons -->
-              <div class="hero-action-row">
-                <button class="btn-primary" id="btn-edit-mobile">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-                  </svg>
-                  <span>Edit Profile</span>
-                </button>
-                <button class="btn-secondary" id="btn-share-profile" aria-label="Share Profile" title="Share Profile">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
-                  </svg>
+                  <span>Generate QR</span>
                 </button>
               </div>
             </div>
 
-            <!-- Bio / Quick Note Card -->
-            <div class="surface-card bio-card">
-              <div class="card-header-row">
-                <h3 class="card-title">About & Hackathon Focus</h3>
-                <span class="status-indicator-live">
-                  <span class="pulse-dot"></span> Active Now
-                </span>
-              </div>
-              <p class="bio-text" id="display-bio">
-                Designing playful, accessible interfaces for student collaboration. Currently building prototypes for the Nova Design Hackathon! 🚀
-              </p>
-              <div class="interest-tags" id="display-tags">
-                <!-- Dynamically generated tags -->
+            <div class="generate-card-qr-box" id="home-qr-visual-teaser">
+              <div class="qr-visual-inner">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span>Instant QR</span>
               </div>
             </div>
-          </section>
+          </div>
 
-          <!-- Column 2: Academic & Campus Credentials -->
-          <section class="credentials-column">
+          <!-- Section: Chat History & Course Topic Threads (Figma 30:593) -->
+          <div class="chat-history-section">
             <div class="section-heading-bar">
-              <span class="section-badge">Campus & Academics</span>
-              <span class="academic-year-pill" id="display-year">Year 3 • Class of 2027</span>
-            </div>
-
-            <div class="credentials-grid">
-              <!-- Campus -->
-              <div class="surface-card credential-item">
-                <div class="card-icon-bubble bubble-cyan">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M3 21h18M5 21V7l7-4 7 4v14M10 9h4M10 13h4M10 17h4"/>
-                  </svg>
-                </div>
-                <div class="credential-meta">
-                  <span class="meta-label">Campus</span>
-                  <strong class="meta-value" id="display-campus">Trafalgar Campus (Oakville)</strong>
-                </div>
+              <div class="section-heading-left">
+                <span class="section-badge">Chat History</span>
+                <span class="unread-chip" id="home-unread-summary">2 unread messages</span>
               </div>
-
-              <!-- Faculty -->
-              <div class="surface-card credential-item">
-                <div class="card-icon-bubble bubble-magenta">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                  </svg>
-                </div>
-                <div class="credential-meta">
-                  <span class="meta-label">Faculty</span>
-                  <strong class="meta-value" id="display-faculty">Faculty of Animation, Arts & Design (FAAD)</strong>
-                </div>
-              </div>
-
-              <!-- Program -->
-              <div class="surface-card credential-item">
-                <div class="card-icon-bubble bubble-lime">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                  </svg>
-                </div>
-                <div class="credential-meta">
-                  <span class="meta-label">Program</span>
-                  <strong class="meta-value" id="display-program">Honours Bachelor of Interaction Design (IXD)</strong>
-                </div>
-              </div>
-
-              <!-- Quick Stats Card -->
-              <div class="surface-card credential-item stats-item">
-                <div class="card-icon-bubble bubble-blue">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                  </svg>
-                </div>
-                <div class="credential-meta">
-                  <span class="meta-label">Campus Network</span>
-                  <strong class="meta-value" id="display-stats">128 Student Connections • 4 Active Study Groups</strong>
-                </div>
+              <div class="filter-tab-pill-group">
+                <button class="filter-tab-btn active" data-filter="active">Active</button>
+                <button class="filter-tab-btn" data-filter="recent">Past 30 days</button>
               </div>
             </div>
-          </section>
+
+            <!-- List of Topic-based Chat Rooms -->
+            <div class="rooms-grid" id="home-rooms-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
 
         </div>
-      </div>
+      </section>
 
-      <!-- Mobile Bottom Navigation Dock (Visible on Mobile Only) -->
+      <!-- VIEW 3: ACTIVE CHAT ROOM WITH ACTION BAR (Figma Frame 1 20:53) -->
+      <section class="view-panel" id="view-room" style="display: none;">
+        <div class="room-shell">
+          
+          <!-- In-Chat Action Bar (Figma Frame 1 20:53: Add Users, Remove User, Delete Chat) -->
+          <div class="figma-room-action-bar">
+            <div class="action-bar-left">
+              <button class="room-back-btn" id="btn-leave-room" title="Back to Home">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M15 18l-6-6 6-6"/>
+                </svg>
+              </button>
+              <div class="room-title-stack">
+                <div class="room-title-row">
+                  <span class="topic-tag-badge" id="room-topic-badge">BUSM 1872</span>
+                  <h3 id="room-header-title">Room NOVA-4821</h3>
+                  <span class="room-status-dot"></span>
+                </div>
+                <div class="room-participants-cluster" id="room-avatar-cluster">
+                  <!-- Dynamic J, C, A initial avatar bubbles -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons from Figma Frame 1 (20:53) -->
+            <div class="action-bar-right">
+              <button class="figma-action-btn btn-add-users" id="btn-room-add-users" title="Add users via QR code">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+                </svg>
+                <span>Add Users</span>
+              </button>
+
+              <button class="figma-action-btn btn-remove-user" id="btn-room-remove-user" title="Participant management">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/>
+                </svg>
+                <span>Remove</span>
+              </button>
+
+              <button class="figma-action-btn btn-delete-chat" id="btn-room-delete-chat" title="End conversation and wipe messages">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                <span>Delete Chat</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- TTL Countdown Banner -->
+          <div class="room-ttl-strip">
+            <span>⏳ Ephemeral Room • Auto-deletes in: <strong id="room-ttl-countdown">23h 59m left</strong></span>
+          </div>
+
+          <!-- Messages Stream -->
+          <div class="chat-messages-scroll" id="chat-messages-container">
+            <!-- Messages injected dynamically -->
+          </div>
+
+          <!-- Quick Suggestion Chips for Campus Collaborations -->
+          <div class="prompt-chips-row" id="quick-prompt-chips">
+            <button class="chip-btn" data-text="Hey team! Ready to work on BUSM 1872? 📚">BUSM 1872 group work? 📚</button>
+            <button class="chip-btn" data-text="Where are you seated on campus? 📍">Where on campus? 📍</button>
+            <button class="chip-btn" data-text="Sharing notes from today's lecture. 📝">Sharing notes 📝</button>
+            <button class="chip-btn" data-text="Let's wrap up and delete this room! ✨">Wrap up & delete ✨</button>
+          </div>
+
+          <!-- Message Composer Bar (Figma Text Bar 16:153) -->
+          <form class="chat-composer-bar" id="chat-composer-form">
+            <input type="text" id="chat-input" placeholder="Text Bar — type a message..." autocomplete="off" required>
+            <button type="submit" class="btn-send-message" id="btn-send" aria-label="Send Message">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </form>
+
+        </div>
+      </section>
+
+      <!-- VIEW 4: STUDENT PROFILE VIEW (Figma 16:80 & 16:101) -->
+      <section class="view-panel" id="view-profile" style="display: none;">
+        <div class="profile-scroll-container">
+          <div class="profile-layout-grid">
+            
+            <!-- Column 1: Identity & Hero Card -->
+            <section class="identity-column">
+              <div class="profile-hero-card">
+                <div class="avatar-container">
+                  <img src="assets/avatar.jpg" alt="Student Profile Picture" class="avatar-img" id="user-avatar">
+                  <label for="avatar-input" class="avatar-edit-badge" title="Change photo">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                  </label>
+                  <input type="file" id="avatar-input" accept="image/*" class="sr-only">
+                </div>
+
+                <!-- Name, Pronouns & Username -->
+                <div class="user-identity">
+                  <div class="name-pronouns-row">
+                    <h1 class="user-display-name" id="display-name">Maya Patel</h1>
+                    <span class="pronoun-badge" id="display-pronouns">she / her</span>
+                  </div>
+                  <div class="username-tag" id="display-username">@maya_sheridan</div>
+                </div>
+
+                <!-- Mobile Edit Action Buttons -->
+                <div class="hero-action-row">
+                  <button class="btn-primary" id="btn-edit-mobile">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                    </svg>
+                    <span>Edit Profile</span>
+                  </button>
+                  <button class="btn-secondary" id="btn-share-profile" aria-label="Share Profile" title="Share Profile">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Bio / Quick Note Card -->
+              <div class="surface-card bio-card">
+                <div class="card-header-row">
+                  <h3 class="card-title">About & Hackathon Focus</h3>
+                  <span class="status-indicator-live">
+                    <span class="pulse-dot"></span> Active Now
+                  </span>
+                </div>
+                <p class="bio-text" id="display-bio">
+                  Designing playful, accessible interfaces for student collaboration. Currently building prototypes for the Nova Design Hackathon! 🚀
+                </p>
+                <div class="interest-tags" id="display-tags">
+                  <!-- Dynamically generated tags -->
+                </div>
+              </div>
+            </section>
+
+            <!-- Column 2: Academic & Campus Credentials -->
+            <section class="credentials-column">
+              <div class="section-heading-bar">
+                <span class="section-badge">Campus & Academics</span>
+                <span class="academic-year-pill" id="display-year">Year 3 • Class of 2027</span>
+              </div>
+
+              <div class="credentials-grid">
+                <!-- Course / Program -->
+                <div class="surface-card credential-item">
+                  <div class="card-icon-bubble bubble-cyan">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                  </div>
+                  <div class="credential-meta">
+                    <span class="meta-label">Primary Course</span>
+                    <strong class="meta-value" id="display-course">BUSM 1872 & IXD</strong>
+                  </div>
+                </div>
+
+                <!-- Campus -->
+                <div class="surface-card credential-item">
+                  <div class="card-icon-bubble bubble-magenta">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 21h18M5 21V7l7-4 7 4v14M10 9h4M10 13h4M10 17h4"/>
+                    </svg>
+                  </div>
+                  <div class="credential-meta">
+                    <span class="meta-label">Campus</span>
+                    <strong class="meta-value" id="display-campus">Trafalgar Campus (Oakville)</strong>
+                  </div>
+                </div>
+
+                <!-- Faculty -->
+                <div class="surface-card credential-item">
+                  <div class="card-icon-bubble bubble-lime">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                  </div>
+                  <div class="credential-meta">
+                    <span class="meta-label">Faculty</span>
+                    <strong class="meta-value" id="display-faculty">Faculty of Animation, Arts & Design (FAAD)</strong>
+                  </div>
+                </div>
+
+                <!-- Academic Program -->
+                <div class="surface-card credential-item">
+                  <div class="card-icon-bubble bubble-blue">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                  </div>
+                  <div class="credential-meta">
+                    <span class="meta-label">Program</span>
+                    <strong class="meta-value" id="display-program">Honours Bachelor of Interaction Design (IXD)</strong>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Mobile Bottom Navigation Dock (Figma Nav Bar 16:150) -->
       <footer class="mobile-bottom-dock" aria-label="Mobile navigation">
+        <button class="dock-tab active" id="dock-home">
+          <svg class="dock-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
+          <span>Home</span>
+        </button>
         <button class="dock-tab" id="dock-chat">
           <img src="assets/chat.svg" alt="Chat" class="dock-icon">
           <span>Chats</span>
+          <span class="dock-dot" id="dock-chat-dot" hidden></span>
         </button>
-        <button class="dock-tab active" id="dock-profile">
+        <button class="dock-tab" id="dock-profile">
           <img src="assets/person.png" alt="Profile" class="dock-icon-img">
           <span>Profile</span>
         </button>
@@ -231,11 +442,154 @@
         </button>
       </footer>
 
-      <!-- Interactive Edit Modal Drawer (Responsive for Mobile & Desktop) -->
-      <div class="modal-backdrop" id="modal-backdrop" aria-hidden="true">
-        <div class="edit-modal-sheet" id="edit-drawer" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <!-- MODAL 1: QR CODE SHARE & INVITE MODAL -->
+      <div class="modal-backdrop" id="qr-modal-backdrop" aria-hidden="true">
+        <div class="edit-modal-sheet qr-modal-card" role="dialog" aria-modal="true">
           <div class="modal-header">
-            <h3 id="modal-title">Edit Profile Information</h3>
+            <div class="qr-modal-header-text">
+              <span class="section-badge" id="qr-topic-badge">BUSM 1872</span>
+              <h3 id="qr-modal-title">Scan QR Code to Join</h3>
+            </div>
+            <button class="modal-close-btn" id="btn-close-qr-modal" aria-label="Close dialog">✕</button>
+          </div>
+
+          <div class="qr-presentation-wrap">
+            <div class="qr-code-box" id="qr-code-element">
+              <!-- QRCode.js renders vector QR here -->
+            </div>
+
+            <div class="room-code-tag">
+              <span>Room Code:</span>
+              <strong id="qr-room-code-display">BUSM-1872-0000</strong>
+            </div>
+
+            <div class="qr-url-copy-box">
+              <input type="text" id="qr-room-url-input" readonly>
+              <button class="btn-copy-link" id="btn-copy-room-link">
+                <span id="copy-btn-text">Copy Link</span>
+              </button>
+            </div>
+
+            <p class="qr-helper-text">
+              ✨ <strong>No account needed:</strong> Classmates and study partners scan this code to jump into the room as guest participants immediately.
+            </p>
+
+            <div class="qr-countdown-notice">
+              <span>⏳ Ephemeral • Room self-destructs in 24 hours</span>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn-primary btn-block" id="btn-enter-room-now">
+              <span>Open Chat Room</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL 2: GUEST JOIN PROMPT (When opening ?room=XYZ) -->
+      <div class="modal-backdrop" id="guest-join-modal-backdrop" aria-hidden="true">
+        <div class="edit-modal-sheet guest-join-card" role="dialog" aria-modal="true">
+          <div class="modal-header">
+            <div class="qr-modal-header-text">
+              <span class="banner-pill" id="guest-invite-topic">BUSM 1872</span>
+              <h3 id="guest-join-title">Join Campus QuickChat</h3>
+            </div>
+          </div>
+          <div class="guest-join-content">
+            <div class="host-invitation-badge">
+              <img src="assets/avatar.jpg" alt="Host avatar" class="mini-host-avatar" id="guest-host-avatar">
+              <div class="host-invitation-meta">
+                <span class="invite-label">Invited by:</span>
+                <strong class="invite-host-name" id="guest-host-name">Maya Patel</strong>
+              </div>
+            </div>
+
+            <p class="guest-join-explainer">
+              No account or login required! Choose an optional nickname or join anonymously as a guest.
+            </p>
+
+            <div class="form-group">
+              <label for="input-guest-nickname">Your Nickname</label>
+              <input type="text" id="input-guest-nickname" placeholder="e.g. Jordan, Sam, Alex">
+            </div>
+
+            <button class="btn-primary btn-block" id="btn-confirm-guest-join">
+              <span>Join Conversation</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL 3: END & DELETE CONFIRMATION -->
+      <div class="modal-backdrop" id="delete-confirm-modal-backdrop" aria-hidden="true">
+        <div class="edit-modal-sheet delete-confirm-card" role="dialog" aria-modal="true">
+          <div class="delete-icon-wrap">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              <line x1="10" y1="11" x2="10" y2="17"/>
+              <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+          </div>
+          <h3>End & Delete Conversation?</h3>
+          <p class="delete-confirm-text">
+            All messages in this room will be permanently wiped immediately for all participants. This action cannot be undone.
+          </p>
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel" id="btn-cancel-delete">Keep Chatting</button>
+            <button type="button" class="btn-danger-solid" id="btn-confirm-delete">Yes, Delete Room</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL 4: POST-CHAT GUEST ONBOARDING (Create Profile) -->
+      <div class="modal-backdrop" id="guest-conversion-modal-backdrop" aria-hidden="true">
+        <div class="edit-modal-sheet guest-conversion-card" role="dialog" aria-modal="true">
+          <div class="conversion-celebration">
+            <span class="celebration-emoji">🎓</span>
+            <h3>Chat Finished!</h3>
+            <p>Enjoyed connecting? Create your Sheridan student profile to easily network at NovaHacks and in future group projects.</p>
+          </div>
+
+          <form id="guest-conversion-form" class="edit-form">
+            <div class="form-group">
+              <label for="convert-name">Full Name</label>
+              <input type="text" id="convert-name" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="convert-pronouns">Pronouns</label>
+                <input type="text" id="convert-pronouns" placeholder="e.g. they / them, she / her">
+              </div>
+              <div class="form-group flex-1">
+                <label for="convert-course">Course / Major</label>
+                <input type="text" id="convert-course" value="BUSM 1872" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="convert-campus">Campus</label>
+              <select id="convert-campus">
+                <option value="Trafalgar Campus (Oakville)" selected>Trafalgar Campus (Oakville)</option>
+                <option value="Davis Campus (Brampton)">Davis Campus (Brampton)</option>
+                <option value="Hazel McCallion Campus (Mississauga)">Hazel McCallion Campus (Mississauga)</option>
+              </select>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn-cancel" id="btn-skip-conversion">Maybe Later</button>
+              <button type="submit" class="btn-primary btn-save">Create Profile</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- MODAL 5: EDIT PROFILE DRAWER (Preserved) -->
+      <div class="modal-backdrop" id="modal-backdrop" aria-hidden="true">
+        <div class="edit-modal-sheet" id="edit-drawer" role="dialog" aria-modal="true">
+          <div class="modal-header">
+            <h3>Edit Profile Information</h3>
             <button class="modal-close-btn" id="btn-close-drawer" aria-label="Close dialog">✕</button>
           </div>
           <form id="profile-form" class="edit-form">
@@ -253,6 +607,11 @@
                 <label for="input-username">Username Handle</label>
                 <input type="text" id="input-username" required>
               </div>
+            </div>
+
+            <div class="form-group">
+              <label for="input-course">Primary Course / Major</label>
+              <input type="text" id="input-course" value="BUSM 1872 & IXD" required>
             </div>
 
             <div class="form-group">
@@ -301,6 +660,8 @@
     </main>
   </div>
 
+  <!-- Lightweight Standalone QR Code Library & Core App Logic -->
+  <script src="assets/qrcode.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
