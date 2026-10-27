@@ -48,16 +48,20 @@
     isGuest: false
   };
 
+  let currentProfile = null;
+
   function getProfileData() {
     try {
       const stored = localStorage.getItem(PROFILE_STORAGE_KEY);
       if (stored) {
-        return { ...DEFAULT_PROFILE, ...JSON.parse(stored) };
+        currentProfile = { ...DEFAULT_PROFILE, ...JSON.parse(stored) };
+        return currentProfile;
       }
     } catch (e) {
       console.warn('Error reading profile.', e);
     }
-    return DEFAULT_PROFILE;
+    currentProfile = { ...DEFAULT_PROFILE };
+    return currentProfile;
   }
 
   function saveProfileData(profile) {
@@ -253,7 +257,9 @@
     }
     const seed = getInitialSeedRooms();
     if (!rooms || rooms.length === 0) {
-      saveAllRooms(seed);
+      try {
+        localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(seed));
+      } catch (e) {}
       return seed;
     }
     // Ensure all Figma 38:1238 seed rooms are present
@@ -265,15 +271,19 @@
       }
     });
     if (updated) {
-      saveAllRooms(rooms);
+      try {
+        localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(rooms));
+      } catch (e) {}
     }
     return rooms;
   }
 
-  function saveAllRooms(rooms) {
+  function saveAllRooms(rooms, updateBadges = true) {
     try {
       localStorage.setItem(ROOMS_STORAGE_KEY, JSON.stringify(rooms));
-      updateNavBadges();
+      if (updateBadges) {
+        updateNavBadges(rooms);
+      }
     } catch (e) {
       console.warn('Error saving rooms to storage.', e);
     }
@@ -443,17 +453,18 @@
       const courseInp = document.getElementById('login-input-course');
       const campusInp = document.getElementById('login-input-campus');
 
-      if (nameInp && !nameInp.value && currentProfile.fullName && !currentProfile.isGuest) {
-        nameInp.value = currentProfile.fullName;
+      const profile = currentProfile || getProfileData();
+      if (nameInp && !nameInp.value && profile && profile.fullName && !profile.isGuest) {
+        nameInp.value = profile.fullName;
       }
-      if (pronounsInp && !pronounsInp.value && currentProfile.pronouns) {
-        pronounsInp.value = currentProfile.pronouns;
+      if (pronounsInp && !pronounsInp.value && profile && profile.pronouns) {
+        pronounsInp.value = profile.pronouns;
       }
-      if (courseInp && !courseInp.value && currentProfile.course) {
-        courseInp.value = currentProfile.course;
+      if (courseInp && !courseInp.value && profile && profile.course) {
+        courseInp.value = profile.course;
       }
-      if (campusInp && currentProfile.campus) {
-        campusInp.value = currentProfile.campus;
+      if (campusInp && profile && profile.campus) {
+        campusInp.value = profile.campus;
       }
     } else if (viewName === 'home' || viewName === 'chats') {
       if (viewHome) viewHome.style.display = 'flex';
@@ -476,9 +487,17 @@
     }
   }
 
-  function updateNavBadges() {
-    const rooms = getAllRooms();
-    const activeCount = rooms.length;
+  function updateNavBadges(providedRooms) {
+    let rooms = providedRooms;
+    if (!rooms) {
+      try {
+        const stored = localStorage.getItem(ROOMS_STORAGE_KEY);
+        rooms = stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        rooms = [];
+      }
+    }
+    const activeCount = Array.isArray(rooms) ? rooms.length : 0;
     const sidebarCount = document.getElementById('sidebar-chat-count');
     const dockDot = document.getElementById('dock-chat-dot');
 
@@ -491,7 +510,7 @@
     }
     const unreadEl = document.getElementById('home-unread-summary');
     if (unreadEl) {
-      const totalUnread = rooms.reduce((acc, r) => acc + (r.unreadCount || 0), 0);
+      const totalUnread = Array.isArray(rooms) ? rooms.reduce((acc, r) => acc + (r.unreadCount || 0), 0) : 0;
       unreadEl.textContent = `${totalUnread} unread messages`;
       unreadEl.hidden = totalUnread === 0;
     }
@@ -562,7 +581,6 @@
 
   // State for accessibility speech tools and privacy settings
   let ttsEnabled = false;
-  let activeFilterTab = 'active';
   const roomPrivacySettings = {}; // maps roomId -> boolean (true = shared, false = anonymous)
 
   // Web Speech API: Text-to-Speech playback
@@ -931,20 +949,20 @@
     }
 
     if (qrTargetMode === 'network') {
-      const isLoopback = window.location.hostname === 'localhost' ||
-                         window.location.hostname === '127.0.0.1' ||
-                         window.location.protocol === 'file:';
-      const port = window.location.port || '3000';
+      const hostname = window.location ? window.location.hostname : 'localhost';
+      const protocol = window.location ? window.location.protocol : 'http:';
+      const isLoopback = !hostname || hostname === 'localhost' || hostname === '127.0.0.1' || protocol === 'file:';
+      const port = (window.location && window.location.port) || '3000';
       if (isLoopback) {
         return `http://${detectedLanIp}:${port}`;
       }
-      return window.location.origin;
+      return (window.location && window.location.origin) || `http://${detectedLanIp}:${port}`;
     } else {
       // Localhost mode
-      if (window.location.protocol === 'file:') {
+      if (window.location && window.location.protocol === 'file:') {
         return 'http://localhost:3000';
       }
-      return window.location.origin;
+      return (window.location && window.location.origin) || 'http://localhost:3000';
     }
   }
 
@@ -965,8 +983,8 @@
       expires: room.expiresAt || (Date.now() + 24 * 3600000)
     });
 
-    const isFile = window.location.protocol === 'file:';
-    const basePath = isFile ? '/' : window.location.pathname;
+    const isFile = window.location && window.location.protocol === 'file:';
+    const basePath = (window.location && window.location.pathname) || '/';
     const cleanPath = basePath.endsWith('.html') || basePath === '/' ? basePath : `${basePath}/`;
     const shareUrl = `${origin}${cleanPath}?${queryParams.toString()}`;
 
@@ -1147,7 +1165,7 @@
   // 10. Initialization & DOM Listeners
   // --------------------------------------------------------------------------
   document.addEventListener('DOMContentLoaded', () => {
-    const currentProfile = getProfileData();
+    currentProfile = getProfileData();
     renderProfile(currentProfile);
 
     // Live clock for mobile status bar
